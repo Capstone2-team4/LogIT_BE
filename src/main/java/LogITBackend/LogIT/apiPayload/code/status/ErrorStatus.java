@@ -24,7 +24,11 @@ public enum ErrorStatus implements BaseErrorCode {
     NAME_NOT_EQUAL(HttpStatus.BAD_REQUEST, "USER_1005", "이름이 일치하지 않습니다."),
     ID_NOT_FOUND(HttpStatus.BAD_REQUEST, "USER_1006", "해당하는 ID가 존재하지 않습니다."),
     ID_NOT_EQUAL(HttpStatus.BAD_REQUEST, "USER_1007", "ID가 일치하지 않습니다."),
-    SAME_PASSWORD(HttpStatus.BAD_REQUEST, "USER_1008", "이전 비밀번호와 동일합니다.");
+    SAME_PASSWORD(HttpStatus.BAD_REQUEST, "USER_1008", "이전 비밀번호와 동일합니다."),
+
+    // 카테고리 관련 응답 2000
+    CATEGORY_NOT_FOUND(HttpStatus.BAD_REQUEST, "CATEGORY_1001", "카테고리가 존재하지 않습니다.");
+
 
     private final HttpStatus httpStatus;
     private final String code;
