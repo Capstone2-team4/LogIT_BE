@@ -19,4 +19,15 @@ public class UserResponseDTO {
         LoginType loginType;
         LocalDateTime createdAt;
     }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UserSignInResultDTO {
+        String accessToken;
+        String refreshToken;
+        String nickname;
+        LocalDateTime createdAt;
+    }
 }

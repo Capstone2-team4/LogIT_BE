@@ -26,4 +26,15 @@ public class UserRequestDTO {
         @NotBlank(message = "비밀번호는 빈값일 수 없습니다.")
         private String password;
     }
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class SignInRequestDTO {
+        @NotBlank(message = "아이디는 빈값일 수 없습니다.")
+        private String username;
+        @NotBlank(message = "비밀번호는 빈값일 수 없습니다.")
+        private String password;
+    }
 }

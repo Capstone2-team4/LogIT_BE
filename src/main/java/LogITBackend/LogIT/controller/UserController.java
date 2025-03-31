@@ -34,4 +34,16 @@ public class UserController {
                 )
         );
     }
+
+    @Operation(summary = "로그인", description =
+            "# 로그인 API 입니다. 아이디와 패스워드를 body에 입력해주세요."
+    )
+    @PostMapping("/signin")
+    public ApiResponse<UserResponseDTO.UserSignInResultDTO> signIn(
+            @RequestBody @Valid UserRequestDTO.SignInRequestDTO request
+    ) {
+        return ApiResponse.onSuccess(
+                userCommandService.signIn(request)
+        );
+    }
 }

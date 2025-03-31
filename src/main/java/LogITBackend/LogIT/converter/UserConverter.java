@@ -22,4 +22,13 @@ public class UserConverter {
                 .createdAt(users.getCreatedAt())
                 .build();
     }
+
+    public static UserResponseDTO.UserSignInResultDTO toUserSignInResultDTO(Users users, String accessToken, String refreshToken) {
+        return UserResponseDTO.UserSignInResultDTO.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .nickname(users.getNickname())
+                .createdAt(users.getCreatedAt())
+                .build();
+    }
 }
