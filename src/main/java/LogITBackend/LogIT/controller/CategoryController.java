@@ -5,6 +5,7 @@ import LogITBackend.LogIT.DTO.CategoryResponseDTO;
 import LogITBackend.LogIT.apiPayload.ApiResponse;
 import LogITBackend.LogIT.service.CategoryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,14 +19,14 @@ public class CategoryController {
 
 
     @GetMapping("")
-    public ApiResponse<List<CategoryResponseDTO>> getCategories() {
+    public ResponseEntity<ApiResponse<List<CategoryResponseDTO>>> getCategories() {
         List<CategoryResponseDTO> categories = categoryService.getCategories();
-        return ApiResponse.onSuccess(categories);
+        return ResponseEntity.ok(ApiResponse.onSuccess(categories));
     }
 
     @PostMapping("")
-    public ApiResponse<CategoryResponseDTO> createCategory(@RequestBody CategoryRequestDTO request) {
+    public ResponseEntity<ApiResponse<CategoryResponseDTO>> createCategory(@RequestBody CategoryRequestDTO request) {
         CategoryResponseDTO category = categoryService.createCategory(request);
-        return ApiResponse.onSuccess(category);
+        return ResponseEntity.ok(ApiResponse.onSuccess(category));
     }
 }
