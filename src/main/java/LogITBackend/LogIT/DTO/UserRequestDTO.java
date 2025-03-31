@@ -1,4 +1,4 @@
-package LogITBackend.LogIT.web.dto;
+package LogITBackend.LogIT.DTO;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -22,6 +22,17 @@ public class UserRequestDTO {
         private String nickname;
         @NotBlank(message = "아이디는 빈값일 수 없습니다.")
         @Size(min = 6, max = 15, message = "아이디는 6 ~ 15자이어야 합니다.")
+        private String username;
+        @NotBlank(message = "비밀번호는 빈값일 수 없습니다.")
+        private String password;
+    }
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class SignInRequestDTO {
+        @NotBlank(message = "아이디는 빈값일 수 없습니다.")
         private String username;
         @NotBlank(message = "비밀번호는 빈값일 수 없습니다.")
         private String password;

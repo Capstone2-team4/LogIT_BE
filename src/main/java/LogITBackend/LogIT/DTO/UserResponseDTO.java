@@ -1,4 +1,4 @@
-package LogITBackend.LogIT.web.dto;
+package LogITBackend.LogIT.DTO;
 
 import LogITBackend.LogIT.domain.enums.LoginType;
 import lombok.AllArgsConstructor;
@@ -17,6 +17,17 @@ public class UserResponseDTO {
         Long userId;
         String nickname;
         LoginType loginType;
+        LocalDateTime createdAt;
+    }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UserSignInResultDTO {
+        String accessToken;
+        String refreshToken;
+        String nickname;
         LocalDateTime createdAt;
     }
 }

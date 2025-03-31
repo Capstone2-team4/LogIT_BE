@@ -1,11 +1,8 @@
 package LogITBackend.LogIT.converter;
 
-import LogITBackend.LogIT.web.dto.UserRequestDTO;
-import LogITBackend.LogIT.web.dto.UserResponseDTO;
+import LogITBackend.LogIT.DTO.UserRequestDTO;
+import LogITBackend.LogIT.DTO.UserResponseDTO;
 import LogITBackend.LogIT.domain.Users;
-import LogITBackend.LogIT.domain.enums.LoginType;
-
-import java.util.ArrayList;
 
 public class UserConverter {
     public static Users toUsers(UserRequestDTO.SignUpRequestDTO request) {
@@ -22,6 +19,15 @@ public class UserConverter {
                 .userId(users.getId())
                 .nickname(users.getNickname())
                 .loginType(users.getLoginType())
+                .createdAt(users.getCreatedAt())
+                .build();
+    }
+
+    public static UserResponseDTO.UserSignInResultDTO toUserSignInResultDTO(Users users, String accessToken, String refreshToken) {
+        return UserResponseDTO.UserSignInResultDTO.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .nickname(users.getNickname())
                 .createdAt(users.getCreatedAt())
                 .build();
     }
