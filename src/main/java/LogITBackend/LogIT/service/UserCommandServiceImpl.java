@@ -2,7 +2,7 @@ package LogITBackend.LogIT.service;
 
 import LogITBackend.LogIT.converter.UserConverter;
 import LogITBackend.LogIT.repository.UserRepository;
-import LogITBackend.LogIT.web.dto.UserRequestDTO;
+import LogITBackend.LogIT.DTO.UserRequestDTO;
 import LogITBackend.LogIT.domain.Users;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

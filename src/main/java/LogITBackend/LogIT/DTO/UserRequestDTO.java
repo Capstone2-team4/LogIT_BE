@@ -1,4 +1,4 @@
-package LogITBackend.LogIT.web.dto;
+package LogITBackend.LogIT.DTO;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

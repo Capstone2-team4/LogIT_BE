@@ -1,4 +1,4 @@
-package LogITBackend.LogIT.web.dto;
+package LogITBackend.LogIT.DTO;
 
 import LogITBackend.LogIT.domain.enums.LoginType;
 import lombok.AllArgsConstructor;

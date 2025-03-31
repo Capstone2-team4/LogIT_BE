@@ -1,8 +1,8 @@
-package LogITBackend.LogIT.web.controller;
+package LogITBackend.LogIT.controller;
 
 import LogITBackend.LogIT.converter.UserConverter;
-import LogITBackend.LogIT.web.dto.UserRequestDTO;
-import LogITBackend.LogIT.web.dto.UserResponseDTO;
+import LogITBackend.LogIT.DTO.UserRequestDTO;
+import LogITBackend.LogIT.DTO.UserResponseDTO;
 import LogITBackend.LogIT.apiPayload.ApiResponse;
 import LogITBackend.LogIT.domain.Users;
 import LogITBackend.LogIT.service.UserCommandService;
