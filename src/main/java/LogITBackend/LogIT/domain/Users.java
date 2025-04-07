@@ -49,6 +49,9 @@ public class Users extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String profileImage;
 
+    @Column(length = 50)
+    private String githubNickname;
+
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "VARCHAR(10)")
     private Gender gender;
