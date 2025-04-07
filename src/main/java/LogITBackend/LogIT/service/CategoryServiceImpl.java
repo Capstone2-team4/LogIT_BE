@@ -4,6 +4,7 @@ import LogITBackend.LogIT.DTO.CategoryRequestDTO;
 import LogITBackend.LogIT.DTO.CategoryResponseDTO;
 import LogITBackend.LogIT.apiPayload.code.status.ErrorStatus;
 import LogITBackend.LogIT.apiPayload.exception.GeneralException;
+import LogITBackend.LogIT.config.security.SecurityUtil;
 import LogITBackend.LogIT.domain.CodeCategories;
 import LogITBackend.LogIT.domain.Users;
 import LogITBackend.LogIT.repository.CategoryRepository;
@@ -22,25 +23,25 @@ public class CategoryServiceImpl implements CategoryService {
     private final UserRepository userRepository;
 
     @Override
-    public List<CategoryResponseDTO> getCategories() {
-        List<CodeCategories> categories = categoryRepository.findAll();
+    public List<String> getCategories() {
+        Long userId = SecurityUtil.getCurrentUserId();
+
+        List<CodeCategories> categories = categoryRepository.findAllByUsersId(userId);
         if (categories.isEmpty()) {
             throw new GeneralException(ErrorStatus.CATEGORY_NOT_FOUND);
         }
         return categories.stream()
-                .map(category -> CategoryResponseDTO.builder()
-                        .category(category.getName())
-                        .build())
+                .map(CodeCategories::getName)
                 .toList();
     }
 
     @Override
     public CategoryResponseDTO createCategory(CategoryRequestDTO request) {
-        Users dummyUser = userRepository.findById(1L)
+        Long userId = SecurityUtil.getCurrentUserId();
+        Users user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
-        System.out.println("dummyUser = " + dummyUser.getName());
-        CodeCategories category = request.ToEntity(dummyUser);
-        System.out.println("category.getName() = " + category.getName());
+
+        CodeCategories category = request.ToEntity(user);
         return CategoryResponseDTO.ToDTO(categoryRepository.save(category));
     }
 }

@@ -19,8 +19,8 @@ public class CategoryController {
 
 
     @GetMapping("")
-    public ResponseEntity<ApiResponse<List<CategoryResponseDTO>>> getCategories() {
-        List<CategoryResponseDTO> categories = categoryService.getCategories();
+    public ResponseEntity<ApiResponse<List<String>>> getCategories() {
+        List<String> categories = categoryService.getCategories();
         return ResponseEntity.ok(ApiResponse.onSuccess(categories));
     }
 
