@@ -29,7 +29,13 @@ public class Codes extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    @Column(columnDefinition = "TEXT")
+    private String code;
+
     private LocalDateTime date;
+
+    @Column(nullable = false)
+    private Integer line;
 
     @Column(nullable = false, length = 50)
     private String fileLocation;
