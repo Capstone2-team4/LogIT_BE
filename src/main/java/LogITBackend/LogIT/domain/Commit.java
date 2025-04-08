@@ -1,7 +1,11 @@
 package LogITBackend.LogIT.domain;
 
 import LogITBackend.LogIT.domain.common.BaseEntity;
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -9,6 +13,9 @@ import java.util.List;
 
 @Entity
 @Table(name = "Commits")
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Commit extends BaseEntity {
 
     @Id
@@ -19,7 +26,7 @@ public class Commit extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
-    @Column(length = 50)
+    @Column(length = 255)
     private String message;
 
     @Column(length = 100)
