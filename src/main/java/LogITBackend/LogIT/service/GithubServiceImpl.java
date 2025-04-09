@@ -2,10 +2,12 @@ package LogITBackend.LogIT.service;
 
 import LogITBackend.LogIT.DTO.CommitResponseDTO;
 import LogITBackend.LogIT.domain.Commit;
+import LogITBackend.LogIT.domain.CommitParent;
 import LogITBackend.LogIT.domain.Users;
 import LogITBackend.LogIT.domain.enums.Gender;
 import LogITBackend.LogIT.domain.enums.LoginType;
 import LogITBackend.LogIT.domain.enums.UserStatus;
+import LogITBackend.LogIT.repository.CommitParentRepository;
 import LogITBackend.LogIT.repository.CommitRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
@@ -20,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,6 +30,7 @@ import java.util.stream.Collectors;
 public class GithubServiceImpl implements GithubService {
 
     private final CommitRepository commitRepository;
+    private final CommitParentRepository commitParentRepository;
 
     @Override
     public List<CommitResponseDTO> getInitialCommits(String owner, String repo, String accessToken) {
@@ -71,6 +75,8 @@ public class GithubServiceImpl implements GithubService {
             String dateStr = (String) author.get("date");
             LocalDateTime date = LocalDateTime.parse(dateStr.replace("Z", ""));
 
+
+
             return new Commit(
                     sha,
                     dummyUser,
@@ -82,6 +88,35 @@ public class GithubServiceImpl implements GithubService {
         }).collect(Collectors.toList());
 
         commitRepository.saveAll(savedCommits);
+
+        // 커밋을 SHA 기준으로 Map으로 변환 (List 참조 대신 성능 개선함)
+        Map<String, Commit> shaToCommitMap = savedCommits.stream()
+                .collect(Collectors.toMap(Commit::getId, c -> c));
+
+        List<CommitParent> savedParents = body.stream()
+                .flatMap(item -> {
+                    String childSha = (String) item.get("sha");
+                    Commit child = shaToCommitMap.get(childSha);
+                    List<Map<String, Object>> parents = (List<Map<String, Object>>) item.get("parents");
+
+                    return parents.stream()
+                            .map(parentMap -> {
+                                String parentSha = (String) parentMap.get("sha");
+                                Commit parent = shaToCommitMap.get(parentSha);
+                                if (child != null && parent != null) {
+                                    CommitParent cp = new CommitParent();
+                                    cp.setCommit(child);
+                                    cp.setParent(parent);
+                                    return cp;
+                                }
+                                return null;
+                            })
+                            .filter(Objects::nonNull);
+                })
+                .collect(Collectors.toList());
+
+        commitParentRepository.saveAll(savedParents);
+
 
         return savedCommits.stream()
                 .map(c -> new CommitResponseDTO(c.getId(), c.getUser().getId() ,c.getMessage(), c.getStats(), c.getDate()))
