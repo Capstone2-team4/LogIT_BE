@@ -27,7 +27,10 @@ public enum ErrorStatus implements BaseErrorCode {
     SAME_PASSWORD(HttpStatus.BAD_REQUEST, "USER_1008", "이전 비밀번호와 동일합니다."),
 
     // 카테고리 관련 응답 2000
-    CATEGORY_NOT_FOUND(HttpStatus.BAD_REQUEST, "CATEGORY_1001", "카테고리가 존재하지 않습니다.");
+    CATEGORY_NOT_FOUND(HttpStatus.BAD_REQUEST, "CATEGORY_2001", "카테고리가 존재하지 않습니다."),
+
+    // commit 관련 응답 3000
+    COMMIT_NOT_FOUND(HttpStatus.BAD_REQUEST, "COMMIT_3001", "커밋이 존재하지 않습니다.");
 
 
     private final HttpStatus httpStatus;

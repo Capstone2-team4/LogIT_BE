@@ -1,14 +1,20 @@
 package LogITBackend.LogIT.service;
 
+import LogITBackend.LogIT.DTO.CommitDetailResponseDTO;
 import LogITBackend.LogIT.DTO.CommitResponseDTO;
+import LogITBackend.LogIT.DTO.FileResponseDTO;
+import LogITBackend.LogIT.apiPayload.exception.GeneralException;
 import LogITBackend.LogIT.domain.Commit;
 import LogITBackend.LogIT.domain.CommitParent;
+import LogITBackend.LogIT.domain.File;
 import LogITBackend.LogIT.domain.Users;
 import LogITBackend.LogIT.domain.enums.Gender;
 import LogITBackend.LogIT.domain.enums.LoginType;
 import LogITBackend.LogIT.domain.enums.UserStatus;
 import LogITBackend.LogIT.repository.CommitParentRepository;
 import LogITBackend.LogIT.repository.CommitRepository;
+import LogITBackend.LogIT.repository.FileRepository;
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -16,14 +22,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static LogITBackend.LogIT.apiPayload.code.status.ErrorStatus.COMMIT_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -31,8 +37,10 @@ public class GithubServiceImpl implements GithubService {
 
     private final CommitRepository commitRepository;
     private final CommitParentRepository commitParentRepository;
+    private final FileRepository fileRepository;
 
     @Override
+    @Transactional
     public List<CommitResponseDTO> getInitialCommits(String owner, String repo, String accessToken) {
         String url = String.format("https://api.github.com/repos/%s/%s/commits", owner, repo);
 
@@ -127,5 +135,61 @@ public class GithubServiceImpl implements GithubService {
     @Override
     public void getCommitsFromWebhook(String payload) {
 
+    }
+
+    @Override
+    @Transactional
+    public CommitDetailResponseDTO getCommitDetails(String owner, String repo, String commitId, String token) {
+        Commit commit = commitRepository.findById(commitId)
+                .orElseThrow(() -> new GeneralException(COMMIT_NOT_FOUND));
+
+        // stats가 null이면 GitHub에서 정보 요청
+        if (commit.getStats() == null) {
+            RestTemplate restTemplate = new RestTemplate();
+
+            // GitHub API 호출
+            String url = String.format("https://api.github.com/repos/%s/%s/commits/%s", owner, repo, commitId);
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "Bearer " + token);
+            headers.set("Accept", "application/vnd.github+json");
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            ResponseEntity<JsonNode> response = restTemplate.exchange(url, HttpMethod.GET, entity, JsonNode.class);
+            JsonNode body = response.getBody();
+
+            // stats 정보 세팅
+            JsonNode statsNode = body.get("stats");
+            if (statsNode != null) {
+                int additions = statsNode.get("additions").asInt();
+                int deletions = statsNode.get("deletions").asInt();
+                int total = statsNode.get("total").asInt();
+                String statsString = String.format("%d additions, %d deletions (total: %d)", additions, deletions, total);
+                commit.setStats(statsString);
+            }
+            // files 저장
+            List<File> fileList = new ArrayList<>();
+            for (JsonNode fileNode : body.get("files")) {
+                File file = new File();
+                file.setCommit(commit);
+                file.setFilename(fileNode.get("filename").asText());
+                file.setAdditions(fileNode.get("additions").asLong());
+                file.setDeletions(fileNode.get("deletions").asLong());
+                file.setPatch(fileNode.has("patch") ? fileNode.get("patch").asText() : null);
+                fileList.add(file);
+            }
+            fileRepository.saveAll(fileList);
+
+            // 업데이트 저장
+            commitRepository.save(commit);
+        }
+
+        List<File> files = fileRepository.findAllByCommitId(commitId);
+
+        List<FileResponseDTO> fileResponses = files.stream()
+                .map(FileResponseDTO::fromEntity)
+                .collect(Collectors.toList());
+
+        CommitResponseDTO commitResponseDTO = CommitResponseDTO.fromEntity(commit);
+        return new CommitDetailResponseDTO(commitResponseDTO, fileResponses);
     }
 }

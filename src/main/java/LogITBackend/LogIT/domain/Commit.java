@@ -1,11 +1,13 @@
 package LogITBackend.LogIT.domain;
 
 import LogITBackend.LogIT.domain.common.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -14,6 +16,7 @@ import java.util.List;
 @Entity
 @Table(name = "Commits")
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class Commit extends BaseEntity {
@@ -35,6 +38,7 @@ public class Commit extends BaseEntity {
     private LocalDateTime date;
 
     @OneToMany(mappedBy = "commit", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<File> files = new ArrayList<>();
 
 }
