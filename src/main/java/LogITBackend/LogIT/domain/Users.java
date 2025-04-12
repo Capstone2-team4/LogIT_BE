@@ -59,6 +59,12 @@ public class Users extends BaseEntity {
 
     private LocalDateTime inactiveDate;
 
+    private String providerId;
+
+    private String githubAccesstoken;
+
+    private String accesstoken;
+
     // 로그인 관련
 //    private LocalDateTime lastLogin;
 
@@ -70,5 +76,9 @@ public class Users extends BaseEntity {
 
     public void encodePassword(String password) {
         this.password = password;
+    }
+
+    public void updateAccessToken(String accessToken) {
+        this.accesstoken = accessToken;
     }
 }

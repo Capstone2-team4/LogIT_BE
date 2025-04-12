@@ -37,7 +37,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/users/signin/**",
             "/swagger-ui/**",
             "/v3/**",
-            "/users/admin/**",
+            "/users/admin/**"
+//            "/**"
 //            "/refresh", "/",
 //            "/index.html"
     };
@@ -45,6 +46,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final RedisTemplate<String, String> redisTemplate;
 
     private static void checkAuthorizationHeader(String header) {
+        log.info("-------------------#@@@@@------------------");
         if(header == null) {
             throw new CustomJwtException("토큰이 전달되지 않았습니다");
         } else if (!header.startsWith("Bearer ")) {
@@ -56,6 +58,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String requestURI = request.getRequestURI();
+        log.info("---------------$$$$$$------------------");
+        log.info("boolean: {}", PatternMatchUtils.simpleMatch(whitelist, requestURI));
+        log.info("requestURI: {}", requestURI);
         return PatternMatchUtils.simpleMatch(whitelist, requestURI);
     }
 
@@ -104,6 +109,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String accessToken = JwtUtils.getTokenFromHeader(authHeader);
             jwtUtils.validateToken(accessToken); // 토큰 검증
             jwtUtils.isTokenBlacklisted(authHeader); // 🚨 블랙리스트 확인
+            log.info("------------------------------------------------------");
         } catch (Exception e) {
             Gson gson = new Gson();
             String json = "";
