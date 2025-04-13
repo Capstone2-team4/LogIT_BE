@@ -77,6 +77,12 @@ public class Users extends BaseEntity {
     @OneToMany(mappedBy = "users", cascade = CascadeType.ALL)
     private List<CodeCategories> codeCategoriesList = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Organization> organizationList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PrivateRepo> privateRepoList = new ArrayList<>();
+
     public void encodePassword(String password) {
         this.password = password;
     }
