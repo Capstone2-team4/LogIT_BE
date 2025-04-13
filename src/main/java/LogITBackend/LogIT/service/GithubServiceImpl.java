@@ -3,29 +3,26 @@ package LogITBackend.LogIT.service;
 import LogITBackend.LogIT.DTO.CommitDetailResponseDTO;
 import LogITBackend.LogIT.DTO.CommitResponseDTO;
 import LogITBackend.LogIT.DTO.FileResponseDTO;
+import LogITBackend.LogIT.DTO.RepositoryResponseDTO;
+import LogITBackend.LogIT.apiPayload.code.status.ErrorStatus;
 import LogITBackend.LogIT.apiPayload.exception.GeneralException;
-import LogITBackend.LogIT.domain.Commit;
-import LogITBackend.LogIT.domain.CommitParent;
-import LogITBackend.LogIT.domain.File;
-import LogITBackend.LogIT.domain.Users;
+import LogITBackend.LogIT.config.security.SecurityUtil;
+import LogITBackend.LogIT.domain.*;
 import LogITBackend.LogIT.domain.enums.Gender;
 import LogITBackend.LogIT.domain.enums.LoginType;
 import LogITBackend.LogIT.domain.enums.UserStatus;
-import LogITBackend.LogIT.repository.CommitParentRepository;
-import LogITBackend.LogIT.repository.CommitRepository;
-import LogITBackend.LogIT.repository.FileRepository;
+import LogITBackend.LogIT.repository.*;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,35 +32,35 @@ import static LogITBackend.LogIT.apiPayload.code.status.ErrorStatus.COMMIT_NOT_F
 @RequiredArgsConstructor
 public class GithubServiceImpl implements GithubService {
 
+    private final UserRepository userRepository;
     private final CommitRepository commitRepository;
     private final CommitParentRepository commitParentRepository;
     private final FileRepository fileRepository;
+    private final PrivateRepoRepository privateRepoRepository;
 
     @Override
     @Transactional
-    public List<CommitResponseDTO> getInitialCommits(String owner, String repo, String accessToken) {
+    public List<CommitResponseDTO> getInitialCommits(String owner, String repo) {
         String url = String.format("https://api.github.com/repos/%s/%s/commits", owner, repo);
 
+        Long userId = SecurityUtil.getCurrentUserId();
+
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+
+        String token = user.getGithubAccesstoken();
+        if (token == null) {
+            throw new GeneralException(ErrorStatus.GITHUB_NOT_ACCESS);
+        }
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken);
+        headers.setBearerAuth(token);
         headers.set("Accept", "application/vnd.github+json");
         headers.set("X-GitHub-Api-Version", "2022-11-28");
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
         RestTemplate restTemplate = new RestTemplate();
 
-        Users dummyUser = Users.builder()
-                .id(1L)  // DB에 실제 저장하지 않아도 됨, 그냥 임의의 ID
-                .nickname("dummy01")
-                .username("dummyuser")
-                .password("dummy1234!")  // 사용 안 하므로 무관
-                .loginType(LoginType.REGULAR)
-                .status(UserStatus.ACTIVE)
-                .githubNickname("dummyGithub")
-                .email("dummy@example.com")
-                .gender(Gender.MALE)
-                .build();
 
         ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
                 url,
@@ -83,11 +80,9 @@ public class GithubServiceImpl implements GithubService {
             String dateStr = (String) author.get("date");
             LocalDateTime date = LocalDateTime.parse(dateStr.replace("Z", ""));
 
-
-
             return new Commit(
                     sha,
-                    dummyUser,
+                    user,
                     message,
                     null,  // stats 필드는 이후에 계산할 수 있음
                     date,
@@ -97,7 +92,6 @@ public class GithubServiceImpl implements GithubService {
 
         commitRepository.saveAll(savedCommits);
 
-        // 커밋을 SHA 기준으로 Map으로 변환 (List 참조 대신 성능 개선함)
         Map<String, Commit> shaToCommitMap = savedCommits.stream()
                 .collect(Collectors.toMap(Commit::getId, c -> c));
 
@@ -108,7 +102,7 @@ public class GithubServiceImpl implements GithubService {
                     List<Map<String, Object>> parents = (List<Map<String, Object>>) item.get("parents");
 
                     return parents.stream()
-                            .map(parentMap -> {
+                            .map( parentMap -> {
                                 String parentSha = (String) parentMap.get("sha");
                                 Commit parent = shaToCommitMap.get(parentSha);
                                 if (child != null && parent != null) {
@@ -129,7 +123,6 @@ public class GithubServiceImpl implements GithubService {
         return savedCommits.stream()
                 .map(c -> new CommitResponseDTO(c.getId(), c.getUser().getId() ,c.getMessage(), c.getStats(), c.getDate()))
                 .collect(Collectors.toList());
-
     }
 
     @Override
@@ -139,11 +132,19 @@ public class GithubServiceImpl implements GithubService {
 
     @Override
     @Transactional
-    public CommitDetailResponseDTO getCommitDetails(String owner, String repo, String commitId, String token) {
+    public CommitDetailResponseDTO getCommitDetails(String owner, String repo, String commitId) {
+        Long userId = SecurityUtil.getCurrentUserId();
+
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+
+        String token = user.getGithubAccesstoken();
+
         Commit commit = commitRepository.findById(commitId)
                 .orElseThrow(() -> new GeneralException(COMMIT_NOT_FOUND));
 
         // stats가 null이면 GitHub에서 정보 요청
+        // 커밋 세부정보는 거의 바뀌지 않으므로, update x
         if (commit.getStats() == null) {
             RestTemplate restTemplate = new RestTemplate();
 
@@ -191,5 +192,73 @@ public class GithubServiceImpl implements GithubService {
 
         CommitResponseDTO commitResponseDTO = CommitResponseDTO.fromEntity(commit);
         return new CommitDetailResponseDTO(commitResponseDTO, fileResponses);
+    }
+
+    @Override
+    public List<RepositoryResponseDTO> getUsersRepos() {
+        Long userId = SecurityUtil.getCurrentUserId();
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+        String githubAccesstoken = user.getGithubAccesstoken();
+        String githubNickname = user.getGithubNickname();
+
+        if (githubAccesstoken == null || githubNickname == null) {
+            throw new GeneralException(ErrorStatus.GITHUB_NOT_ACCESS);
+        }
+
+        List<PrivateRepo> privateRepo = privateRepoRepository.findAllByUserId(userId);
+
+        if (privateRepo.isEmpty()) {
+            String url = "https://api.github.com/users/" + githubNickname + "/repos";
+            RestTemplate restTemplate = new RestTemplate();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(githubAccesstoken);
+            headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+            HttpEntity<Void> request = new HttpEntity<>(headers);
+
+            ResponseEntity<JsonNode> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    request,
+                    JsonNode.class
+            );
+
+            JsonNode body = response.getBody();
+            List<PrivateRepo> repoList = new ArrayList<>();
+
+            for (JsonNode item : body) {
+                String name = item.get("name").asText();
+                String createdAtStr = item.get("created_at").asText();
+                String updatedAtStr = item.get("updated_at").asText();
+
+                LocalDateTime createdAt = LocalDateTime.parse(createdAtStr, DateTimeFormatter.ISO_DATE_TIME);
+                LocalDateTime updatedAt = LocalDateTime.parse(updatedAtStr, DateTimeFormatter.ISO_DATE_TIME);
+
+                PrivateRepo repo = PrivateRepo.builder()
+                        .user(user)
+                        .repoName(name)
+                        .createdAt(createdAt)
+                        .updatedAt(updatedAt)
+                        .build();
+
+                repoList.add(repo);
+            }
+
+            privateRepoRepository.saveAll(repoList);
+
+        }
+
+        // db에 있는거 그대로 출력하는 로직
+        return privateRepoRepository.findAllByUserId(userId)
+                .stream()
+                .map(repo -> new RepositoryResponseDTO(
+                        repo.getId(),
+                        userId,
+                        repo.getRepoName(),
+                        repo.getCreatedAt(),
+                        repo.getUpdatedAt()
+                ))
+                .collect(Collectors.toList());
     }
 }

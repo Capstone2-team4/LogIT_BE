@@ -7,12 +7,15 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PrivateRepo extends BaseEntity {
+public class PrivateRepo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,4 +26,9 @@ public class PrivateRepo extends BaseEntity {
 
     @Column(length = 40, nullable = false)
     private String repoName;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
+
 }
