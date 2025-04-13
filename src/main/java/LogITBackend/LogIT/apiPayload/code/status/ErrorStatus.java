@@ -31,11 +31,13 @@ public enum ErrorStatus implements BaseErrorCode {
     CATEGORY_NOT_FOUND(HttpStatus.BAD_REQUEST, "CATEGORY_2001", "카테고리가 존재하지 않습니다."),
 
     // commit 관련 응답 3000
-    COMMIT_NOT_FOUND(HttpStatus.BAD_REQUEST, "COMMIT_3001", "커밋이 존재하지 않습니다.");
+    COMMIT_NOT_FOUND(HttpStatus.BAD_REQUEST, "COMMIT_3001", "커밋이 존재하지 않습니다."),
 
+    // repo 관련 응답 4000
+    REPO_NOT_FOUND(HttpStatus.BAD_REQUEST, "REPO_4001", "레포지토리가 존재하지 않습니다."),
 
-
-
+    // owner 관련 응답 5000
+    OWNER_NOT_FOUND(HttpStatus.BAD_REQUEST, "OWNER_5001", "OWNER이 존재하지 않습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

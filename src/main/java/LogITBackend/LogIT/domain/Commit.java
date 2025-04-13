@@ -26,8 +26,12 @@ public class Commit extends BaseEntity {
     private String id; // commit SHA
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private Users user;
+    @JoinColumn(name = "repo_id", nullable = false)
+    private Repo repo;
+
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "user_id", nullable = false)
+//    private Users user;
 
     @Column(length = 255)
     private String message;
