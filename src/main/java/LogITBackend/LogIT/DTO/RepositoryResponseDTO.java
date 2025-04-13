@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class RepositoryResponseDTO {
         private Long id;
-        private Long user_id;
         private String repoName;
         LocalDateTime createdAt;
         LocalDateTime updatedAt;

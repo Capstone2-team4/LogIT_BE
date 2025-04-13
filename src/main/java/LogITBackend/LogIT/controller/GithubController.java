@@ -2,6 +2,7 @@ package LogITBackend.LogIT.controller;
 
 import LogITBackend.LogIT.DTO.CommitDetailResponseDTO;
 import LogITBackend.LogIT.DTO.CommitResponseDTO;
+import LogITBackend.LogIT.DTO.GithubRepoResponse;
 import LogITBackend.LogIT.DTO.RepositoryResponseDTO;
 import LogITBackend.LogIT.apiPayload.ApiResponse;
 import LogITBackend.LogIT.service.GithubService;
@@ -23,7 +24,7 @@ public class GithubController {
             @PathVariable("owners") String owners,
             @PathVariable("repos") String repos
     ) {
-        List<CommitResponseDTO> commits = githubService.getInitialCommits(owners, repos);
+        List<CommitResponseDTO> commits = githubService.getCommits(owners, repos);
         return ResponseEntity.ok(ApiResponse.onSuccess(commits));
     }
 
@@ -39,7 +40,7 @@ public class GithubController {
 
     @GetMapping("/users/repos")
     public ResponseEntity<ApiResponse<?>> getUsersRepos() {
-        List <RepositoryResponseDTO> repos = githubService.getUsersRepos();
+        GithubRepoResponse repos = githubService.getUsersRepos();
         return ResponseEntity.ok(ApiResponse.onSuccess(repos));
     }
 

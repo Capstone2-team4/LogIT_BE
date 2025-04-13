@@ -6,7 +6,6 @@ import LogITBackend.LogIT.domain.enums.LoginType;
 import LogITBackend.LogIT.domain.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -78,10 +77,7 @@ public class Users extends BaseEntity {
     private List<CodeCategories> codeCategoriesList = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Organization> organizationList = new ArrayList<>();
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PrivateRepo> privateRepoList = new ArrayList<>();
+    private List<Owner> ownerList = new ArrayList<>();
 
     public void encodePassword(String password) {
         this.password = password;
