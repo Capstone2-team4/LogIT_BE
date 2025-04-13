@@ -14,6 +14,13 @@ public class UserConverter {
 //                .loginType(LoginType.REGULAR)
                 .build();
     }
+    public static Users githubDatatoUsers(UserRequestDTO.GithubSignUpRequestDTO request) {
+        return Users.builder()
+                .providerId(request.getProviderId())
+                .nickname(request.getNickname())
+                .githubAccesstoken(request.getGithubAccessToken())
+                .build();
+    }
     public static UserResponseDTO.UserSignUpResultDTO toUserSignUpResultDTO(Users users) {
         return UserResponseDTO.UserSignUpResultDTO.builder()
                 .userId(users.getId())
