@@ -53,6 +53,9 @@ public class GithubServiceImpl implements GithubService {
             throw new GeneralException(ErrorStatus.GITHUB_NOT_ACCESS);
         }
 
+        LocalDateTime latestDate = commitRepository.findLatestCommitDateByUserId(user.getId())
+                .orElse(LocalDateTime.MIN);
+
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
         headers.set("Accept", "application/vnd.github+json");
@@ -72,7 +75,17 @@ public class GithubServiceImpl implements GithubService {
         List<Map<String, Object>> body = response.getBody();
         if (body == null) return Collections.emptyList();
 
-        List<Commit> savedCommits = body.stream().map(item -> {
+        List<Map<String, Object>> newCommits = body.stream()
+                .filter(item -> {
+                    Map<String, Object> commit = (Map<String, Object>) item.get("commit");
+                    Map<String, Object> author = (Map<String, Object>) commit.get("author");
+                    String dateStr = (String) author.get("date");
+                    LocalDateTime date = LocalDateTime.parse(dateStr.replace("Z", ""));
+                    return date.isAfter(latestDate);
+                })
+                .toList();
+
+        List<Commit> savedCommits = newCommits.stream().map(item -> {
             String sha = (String) item.get("sha");
             Map<String, Object> commit = (Map<String, Object>) item.get("commit");
             String message = (String) commit.get("message");
@@ -95,7 +108,7 @@ public class GithubServiceImpl implements GithubService {
         Map<String, Commit> shaToCommitMap = savedCommits.stream()
                 .collect(Collectors.toMap(Commit::getId, c -> c));
 
-        List<CommitParent> savedParents = body.stream()
+        List<CommitParent> savedParents = newCommits.stream()
                 .flatMap(item -> {
                     String childSha = (String) item.get("sha");
                     Commit child = shaToCommitMap.get(childSha);
@@ -125,13 +138,9 @@ public class GithubServiceImpl implements GithubService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public void getCommitsFromWebhook(String payload) {
-
-    }
 
     @Override
-    @Transactional
+    @Transactional // 커밋 세부정보는 거의 바뀌지 않으므로, update x
     public CommitDetailResponseDTO getCommitDetails(String owner, String repo, String commitId) {
         Long userId = SecurityUtil.getCurrentUserId();
 
@@ -144,7 +153,7 @@ public class GithubServiceImpl implements GithubService {
                 .orElseThrow(() -> new GeneralException(COMMIT_NOT_FOUND));
 
         // stats가 null이면 GitHub에서 정보 요청
-        // 커밋 세부정보는 거의 바뀌지 않으므로, update x
+
         if (commit.getStats() == null) {
             RestTemplate restTemplate = new RestTemplate();
 
