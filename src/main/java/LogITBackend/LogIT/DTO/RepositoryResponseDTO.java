@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RepositoryResponseDTO {
-        private Long id;
         private String repoName;
         LocalDateTime createdAt;
         LocalDateTime updatedAt;
