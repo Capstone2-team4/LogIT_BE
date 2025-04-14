@@ -1,9 +1,6 @@
 package LogITBackend.LogIT.service;
 
-import LogITBackend.LogIT.DTO.CommitDetailResponseDTO;
-import LogITBackend.LogIT.DTO.CommitResponseDTO;
-import LogITBackend.LogIT.DTO.GithubRepoResponse;
-import LogITBackend.LogIT.DTO.RepositoryResponseDTO;
+import LogITBackend.LogIT.DTO.*;
 
 import java.util.List;
 
@@ -13,4 +10,8 @@ public interface GithubService {
     CommitDetailResponseDTO getCommitDetails(String owners, String repos, String commitId);
 
     GithubRepoResponse getUsersRepos();
+
+    List<OrgResponse> getUserOrgs();
+
+    GithubRepoResponse getUserOrgsRepos(String owners);
 }

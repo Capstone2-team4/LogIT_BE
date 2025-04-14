@@ -1,9 +1,6 @@
 package LogITBackend.LogIT.controller;
 
-import LogITBackend.LogIT.DTO.CommitDetailResponseDTO;
-import LogITBackend.LogIT.DTO.CommitResponseDTO;
-import LogITBackend.LogIT.DTO.GithubRepoResponse;
-import LogITBackend.LogIT.DTO.RepositoryResponseDTO;
+import LogITBackend.LogIT.DTO.*;
 import LogITBackend.LogIT.apiPayload.ApiResponse;
 import LogITBackend.LogIT.service.GithubService;
 import lombok.RequiredArgsConstructor;
@@ -44,5 +41,17 @@ public class GithubController {
         return ResponseEntity.ok(ApiResponse.onSuccess(repos));
     }
 
+    @GetMapping("/users/org")
+    public ResponseEntity<ApiResponse<?>> getUserOrgs() {
+        List<OrgResponse> orgs = githubService.getUserOrgs();
+        return ResponseEntity.ok(ApiResponse.onSuccess(orgs));
+    }
 
+    @GetMapping("/users/{owners}/repos")
+    public ResponseEntity<ApiResponse<?>> getUserOrgsRepos(
+            @PathVariable("owners") String owners
+    ) {
+        GithubRepoResponse repos = githubService.getUserOrgsRepos(owners);
+        return ResponseEntity.ok(ApiResponse.onSuccess(repos));
+    }
 }

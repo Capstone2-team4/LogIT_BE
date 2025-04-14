@@ -21,6 +21,6 @@ public class Owner extends BaseEntity {
     @JoinColumn(name = "user_id")
     private Users user;
 
-    @Column(length = 30, nullable = false)
+    @Column(length = 100, nullable = false)
     private String ownerName;
 }
