@@ -24,7 +24,7 @@ public class Repo {
     @JoinColumn(name = "owner_id")
     private Owner owner;
 
-    @Column(length = 40, nullable = false)
+    @Column(length = 100, nullable = false)
     private String repoName;
 
     @OneToMany(mappedBy = "repo", cascade = CascadeType.ALL)

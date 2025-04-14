@@ -243,39 +243,145 @@ public class GithubServiceImpl implements GithubService {
         JsonNode body = response.getBody();
         List<Repo> repoList = new ArrayList<>();
 
-            for (JsonNode item : body) {
-                String name = item.get("name").asText();
-                String createdAtStr = item.get("created_at").asText();
-                String updatedAtStr = item.get("updated_at").asText();
+        for (JsonNode item : body) {
+            String name = item.get("name").asText();
+            String createdAtStr = item.get("created_at").asText();
+            String updatedAtStr = item.get("updated_at").asText();
 
-                LocalDateTime createdAt = LocalDateTime.parse(createdAtStr, DateTimeFormatter.ISO_DATE_TIME);
-                LocalDateTime updatedAt = LocalDateTime.parse(updatedAtStr, DateTimeFormatter.ISO_DATE_TIME);
+            LocalDateTime createdAt = LocalDateTime.parse(createdAtStr, DateTimeFormatter.ISO_DATE_TIME);
+            LocalDateTime updatedAt = LocalDateTime.parse(updatedAtStr, DateTimeFormatter.ISO_DATE_TIME);
 
-                if (createdAt.isAfter(latestDate)) {
-                    Repo repo = Repo.builder()
-                            .owner(owner)
-                            .repoName(name)
-                            .createdAt(createdAt)
-                            .updatedAt(updatedAt)
-                            .build();
+            if (createdAt.isAfter(latestDate)) {
+                Repo repo = Repo.builder()
+                        .owner(owner)
+                        .repoName(name)
+                        .createdAt(createdAt)
+                        .updatedAt(updatedAt)
+                        .build();
 
-                    repoList.add(repo);
-                }
+                repoList.add(repo);
             }
-            repoRepository.saveAll(repoList);
+        }
+        repoRepository.saveAll(repoList);
 
         // db에 있는거 그대로 출력하는 로직
         List<RepositoryResponseDTO> repoDTOList = repoRepository.findAllByOwnerId((owner.getId()))
                 .stream()
                 .map(repo -> new RepositoryResponseDTO(
-                                repo.getId(),
-                                repo.getRepoName(),
-                                repo.getCreatedAt(),
-                                repo.getUpdatedAt()
+                        repo.getRepoName(),
+                        repo.getCreatedAt(),
+                        repo.getUpdatedAt()
                 ))
                 .collect(Collectors.toList());
 
         return new GithubRepoResponse(owner.getOwnerName(), repoDTOList);
+    }
+
+    @Override
+    public List<OrgResponse> getUserOrgs() {
+        Long userId = SecurityUtil.getCurrentUserId();
+
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+
+        String githubAccesstoken = user.getGithubAccesstoken();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(githubAccesstoken);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        // Step 1: 조직 목록 조회
+        ResponseEntity<JsonNode> orgResponse = restTemplate.exchange(
+                "https://api.github.com/user/orgs",
+                HttpMethod.GET,
+                request,
+                JsonNode.class
+        );
+
+        List<OrgResponse> orgResponses = new ArrayList<>();
+
+        for (JsonNode org : orgResponse.getBody()) {
+            String orgName = org.get("login").asText(); // Owner 이름
+
+            ownerRepository.findByUserIdAndOwnerName(user.getId(), orgName)
+                    .orElseGet(() -> ownerRepository.save(
+                            Owner.builder()
+                                    .user(user)
+                                    .ownerName(orgName)
+                                    .build()
+                    ));
+
+            orgResponses.add(new OrgResponse(orgName));
+        }
+        return orgResponses;
+    }
+
+    @Override
+    public GithubRepoResponse getUserOrgsRepos(String owners) {
+        Long userId = SecurityUtil.getCurrentUserId();
+
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+
+        String githubAccesstoken = user.getGithubAccesstoken();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(githubAccesstoken);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        Owner owner = ownerRepository.findByUserIdAndOwnerName(userId, owners)
+                .orElseGet(() -> ownerRepository.save(
+                        Owner.builder()
+                                .user(user)
+                                .ownerName(owners)
+                                .build()
+                ));
+
+        LocalDateTime latestDate = repoRepository.findLatestRepoCreatedAtByOwnerId(owner.getId())
+                .orElse(LocalDateTime.MIN);
+
+        String url = "https://api.github.com/orgs/" + owners + "/repos?per_page=100";
+        ResponseEntity<JsonNode> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                request,
+                JsonNode.class
+        );
+
+        List<RepositoryResponseDTO> repoDTOList = new ArrayList<>();
+        List<Repo> newRepos = new ArrayList<>();
+
+        for (JsonNode repoNode : response.getBody()) {
+            String repoName = repoNode.get("name").asText();
+            LocalDateTime createdAt = LocalDateTime.parse(repoNode.get("created_at").asText(), DateTimeFormatter.ISO_DATE_TIME);
+            LocalDateTime updatedAt = LocalDateTime.parse(repoNode.get("updated_at").asText(), DateTimeFormatter.ISO_DATE_TIME);
+
+            if (createdAt.isAfter(latestDate)) {
+                Repo repo = Repo.builder()
+                        .owner(owner)
+                        .repoName(repoName)
+                        .createdAt(createdAt)
+                        .updatedAt(updatedAt)
+                        .build();
+                newRepos.add(repo);
+            }
+
+            repoDTOList.add(new RepositoryResponseDTO(
+                    repoName,
+                    createdAt,
+                    updatedAt
+            ));
+        }
+
+        repoRepository.saveAll(newRepos);
+
+        return new GithubRepoResponse(owners, repoDTOList);
     }
 
     private Owner getOrCreateOwner(Users user, List<Owner> owners) {
