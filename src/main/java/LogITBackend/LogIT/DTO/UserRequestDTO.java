@@ -47,4 +47,12 @@ public class UserRequestDTO {
         private String nickname;
         private String githubAccessToken;
     }
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class GithubRegisterRequestDTO {
+        private String providerId;
+    }
 }

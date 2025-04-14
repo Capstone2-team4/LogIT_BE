@@ -3,6 +3,8 @@ package LogITBackend.LogIT.service;
 import LogITBackend.LogIT.DTO.UserResponseDTO;
 import LogITBackend.LogIT.apiPayload.code.status.ErrorStatus;
 import LogITBackend.LogIT.apiPayload.exception.handler.ExceptionHandler;
+import LogITBackend.LogIT.config.security.SecurityConfig;
+import LogITBackend.LogIT.config.security.SecurityUtil;
 import LogITBackend.LogIT.converter.UserConverter;
 import LogITBackend.LogIT.jwt.JwtUtils;
 import LogITBackend.LogIT.repository.UserRepository;
@@ -58,6 +60,19 @@ public class UserCommandServiceImpl implements UserCommandService {
         String refreshToken = generateAndSaveRefreshToken(key, refreshExpTime);
 
         return UserConverter.toUserSignInResultDTO(getUser, accessToken, refreshToken);
+    }
+
+    @Override
+    public void register(UserRequestDTO.GithubRegisterRequestDTO request) {
+        Users getGithubInfo = userRepository.findByProviderId(request.getProviderId())
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND)); // 후에 errorstatus바꾸기
+        Long userId = SecurityUtil.getCurrentUserId();
+        Users getUser = userRepository.findById(userId)
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
+        getUser.updateGithubAccessToken(getGithubInfo.getGithubAccesstoken());
+        getUser.updateProviderId(getGithubInfo.getProviderId());
+        getUser.updateGithubNickname(getGithubInfo.getNickname());
+        userRepository.delete(getGithubInfo);
     }
 
     public String generateAccessToken(Long userId, int accessExpTime) {

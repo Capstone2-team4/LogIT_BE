@@ -1,5 +1,7 @@
 package LogITBackend.LogIT.config.security.oauth;
 
+import LogITBackend.LogIT.DTO.UserRequestDTO;
+import LogITBackend.LogIT.converter.UserConverter;
 import LogITBackend.LogIT.domain.Users;
 import LogITBackend.LogIT.jwt.JwtUtils;
 import LogITBackend.LogIT.repository.UserRepository;
@@ -16,12 +18,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.util.Map;
 
 @Component
 @Slf4j
@@ -38,36 +46,54 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
     private final UserCommandService userCommandService;
     private final JwtUtils jwtUtils;
     private final RedisTemplate<String, String> redisTemplate;
+    private final OAuth2AuthorizedClientService authorizedClientService;
 
     @Override
     @Transactional
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
+        OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
+        OAuth2User oauthUser = oauthToken.getPrincipal();
+
+        // 클라이언트 정보 (깃허브, 구글 등)
+        String registrationId = oauthToken.getAuthorizedClientRegistrationId();
+
+        // accessToken 꺼내기
+        OAuth2AuthorizedClient client = authorizedClientService.loadAuthorizedClient(
+                registrationId,
+                oauthToken.getName()
+        );
+        OAuth2AccessToken accessToken = client.getAccessToken();
+
+        // 사용자 정보 Map (GitHub의 경우 login, id, name 등 포함)
+        Map<String, Object> attributes = oauthUser.getAttributes();
+
+        // GitHub 기준 예시 (플랫폼마다 다름)
+        String providerId = String.valueOf(attributes.get("id"));
+        String nickname = (String) attributes.get("login");
+
         // 여기에 로그인 성공 후 처리할 내용을 작성하기!
         DefaultOAuth2User oAuth2User = (DefaultOAuth2User) authentication.getPrincipal();
         log.info("Suceess!---------------------");
 
-        // 프론트엔드에 보내줄 accessToken 및 refreshToken생성
-        Users getUser = userRepository.findByProviderId(oAuth2User.getName()).orElseThrow(null);
-        String accessToken = userCommandService.generateAccessToken(getUser.getId(), accessExpTime);
-        String key = "users:" + getUser.getId().toString();
-        String refreshToken = userCommandService.generateAndSaveRefreshToken(key, refreshExpTime);
+        Users existUser = userRepository.findByProviderId(providerId).orElse(null);
 
-        // db에 인가처리할 accessToken저장 (개발자 테스트용)
-        getUser.updateAccessToken(accessToken);
+        // user dto 생성해서 user저장
+        if(existUser == null) {
+            Users newUser = UserConverter.githubDatatoUsers(
+                    UserRequestDTO.GithubSignUpRequestDTO.builder()
+                            .providerId(providerId)
+                            .nickname(nickname)
+                            .githubAccessToken(accessToken.getTokenValue())
+                            .build()
+            );
+            userRepository.save(newUser);
+        }
 
-        // 프론트엔드에 accessToken과 refreshToken를 redirect url로 보내주기
-        // ✅ refreshToken 쿠키에 저장
-        Cookie cookie = new Cookie("refreshToken", refreshToken);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(7 * 24 * 60 * 60 * 2); // 14일
-        response.addCookie(cookie);
-
-        // ✅ accessToken 쿼리 파라미터로 전달
+        // ✅ provideId 쿼리 파라미터로 전달
         String redirectUrl = UriComponentsBuilder
                 .fromUriString(redirectUri)
-                .queryParam("accessToken", accessToken)
+                .queryParam("providerId", providerId)
                 .build()
                 .toUriString();
 
