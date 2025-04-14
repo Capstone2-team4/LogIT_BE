@@ -46,4 +46,15 @@ public class UserController {
                 userCommandService.signIn(request)
         );
     }
+
+    @Operation(summary = "깃허브 연동", description =
+            "# 깃허브 연동 API 입니다. providerId를 입력해주세요."
+    )
+    @PostMapping("/register/github")
+    public Object register(
+            @RequestBody @Valid UserRequestDTO.GithubRegisterRequestDTO request
+    ) {
+        userCommandService.register(request);
+        return ApiResponse.onSuccess(null);
+    }
 }

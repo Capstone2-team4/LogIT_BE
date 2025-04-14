@@ -86,4 +86,16 @@ public class Users extends BaseEntity {
     public void updateAccessToken(String accessToken) {
         this.accesstoken = accessToken;
     }
+
+    public void updateGithubAccessToken(String githubAccessToken) {
+        this.githubAccesstoken = githubAccessToken;
+    }
+
+    public void updateProviderId(String providerId) {
+        this.providerId = providerId;
+    }
+
+    public void updateGithubNickname(String nickname) {
+        this.githubNickname = nickname;
+    }
 }
