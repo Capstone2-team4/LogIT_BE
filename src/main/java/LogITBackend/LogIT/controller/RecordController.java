@@ -28,13 +28,13 @@ public class RecordController {
     )
 
     @PostMapping(value = "/")
-    public ApiResponse<RecordResponseDTO.RecordResultDTO> createRecord(
+    public ApiResponse<RecordResponseDTO.GetRecordResultDTO> createRecord(
             @RequestBody RecordRequestDTO.CreateRecordRequestDTO request
     ){
         Records records = recordCommandService.createRecord(request);
 
         return ApiResponse.onSuccess(
-                RecordConverter.toRecordResultDTO(records)
+                RecordConverter.toGetRecordDetailResultDTO(records)
         );
     }
 
@@ -90,13 +90,13 @@ public class RecordController {
                     """
     )
     @GetMapping("/{recordId}")
-    public ApiResponse<RecordResponseDTO.RecordResultDTO> getRecordDetail(
+    public ApiResponse<RecordResponseDTO.GetRecordResultDTO> getRecordDetail(
             @PathVariable Long recordId
     ) {
         Records recordDetail = recordQueryService.getRecordDetail(recordId);
 
         return ApiResponse.onSuccess(
-                RecordConverter.toRecordResultDTO(recordDetail)
+                RecordConverter.toGetRecordDetailResultDTO(recordDetail)
         );
     }
 }

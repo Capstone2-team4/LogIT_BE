@@ -36,12 +36,24 @@ public class RecordConverter {
     }
 
     public static RecordResponseDTO.GetRecordResultDTO toGetRecordResultDTO(Records record) {
-        String contentPreview = record.getContent().length() > 20 ? record.getContent().substring(0, 20) + "..." : record.getContent();
+        String contentPreview = record.getContent().length() > 70 ? record.getContent().substring(0, 70) + "..." : record.getContent();
 
         return RecordResponseDTO.GetRecordResultDTO.builder()
                 .recordId(record.getId())
+                .author(record.getUsers().getNickname())
                 .title(record.getTitle())
                 .content(contentPreview)
+                .createdAt(record.getCreatedAt())
+                .build();
+    }
+
+    // Convert Records entity to RecordResponseDTO
+    public static RecordResponseDTO.GetRecordResultDTO toGetRecordDetailResultDTO(Records record) {
+        return RecordResponseDTO.GetRecordResultDTO.builder()
+                .recordId(record.getId())
+                .author(record.getUsers().getNickname())
+                .title(record.getTitle())
+                .content(record.getContent())
                 .createdAt(record.getCreatedAt())
                 .build();
     }
