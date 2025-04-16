@@ -28,13 +28,13 @@ public class RecordController {
     )
 
     @PostMapping(value = "/")
-    public ApiResponse<RecordResponseDTO.GetRecordResultDTO> createRecord(
+    public ApiResponse<RecordResponseDTO.CreateRecordResultDTO> createRecord(
             @RequestBody RecordRequestDTO.CreateRecordRequestDTO request
     ){
         Records records = recordCommandService.createRecord(request);
 
         return ApiResponse.onSuccess(
-                RecordConverter.toGetRecordDetailResultDTO(records)
+                RecordConverter.toCreateRecordResultDTO(records)
         );
     }
 
