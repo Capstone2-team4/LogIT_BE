@@ -34,6 +34,7 @@ public class RecordResponseDTO {
     @AllArgsConstructor
     public static class GetRecordResultDTO {
         Long recordId;
+        String author;
         String title;
         String content;
         LocalDateTime createdAt;
