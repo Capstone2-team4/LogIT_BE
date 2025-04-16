@@ -57,4 +57,16 @@ public class RecordConverter {
                 .createdAt(record.getCreatedAt())
                 .build();
     }
+
+    // Convert Records entity to RecordResponseDTO
+    public static RecordResponseDTO.CreateRecordResultDTO toCreateRecordResultDTO(Records record) {
+        String contentPreview = record.getContent().length() > 70 ? record.getContent().substring(0, 70) + "..." : record.getContent();
+        return RecordResponseDTO.CreateRecordResultDTO.builder()
+                .recordId(record.getId())
+                .author(record.getUsers().getNickname())
+                .title(record.getTitle())
+                .content(contentPreview)
+                .createdAt(record.getCreatedAt())
+                .build();
+    }
 }

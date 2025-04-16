@@ -39,4 +39,16 @@ public class RecordResponseDTO {
         String content;
         LocalDateTime createdAt;
     }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CreateRecordResultDTO {
+        Long recordId;
+        String author;
+        String title;
+        String content;
+        LocalDateTime createdAt;
+    }
 }
