@@ -35,7 +35,7 @@ public class GithubServiceImpl implements GithubService {
     @Override
     @Transactional
     public List<CommitResponseDTO> getCommits(String ownerName, String repoName) {
-        String url = String.format("https://api.github.com/repos/%s/%s/commits", ownerName, repoName);
+        String url = String.format("https://api.github.com/repos/%s/%s/commits?per_page=100", ownerName, repoName);
 
         Long userId = SecurityUtil.getCurrentUserId();
 
