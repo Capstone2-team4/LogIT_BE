@@ -40,7 +40,10 @@ public enum ErrorStatus implements BaseErrorCode {
     OWNER_NOT_FOUND(HttpStatus.BAD_REQUEST, "OWNER_5001", "OWNER이 존재하지 않습니다."),
 
     // record 관련 응답 6000
-    RECORD_NOT_FOUND(HttpStatus.BAD_REQUEST, "RECORD_6001", "기록이 존재하지 않습니다.");
+    RECORD_NOT_FOUND(HttpStatus.BAD_REQUEST, "RECORD_6001", "기록이 존재하지 않습니다."),
+
+    // branch 관련 응답 7000
+    BRANCH_NOT_FOUND(HttpStatus.BAD_REQUEST, "BRANCH_7001", "브랜치가 존재하지 않습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
