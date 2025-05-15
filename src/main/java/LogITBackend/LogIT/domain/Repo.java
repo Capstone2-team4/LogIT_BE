@@ -1,6 +1,5 @@
 package LogITBackend.LogIT.domain;
 
-import LogITBackend.LogIT.domain.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,7 +27,7 @@ public class Repo {
     private String repoName;
 
     @OneToMany(mappedBy = "repo", cascade = CascadeType.ALL)
-    private List<Commit> commit;
+    private List<Branch> branches;
 
     private LocalDateTime createdAt;
 

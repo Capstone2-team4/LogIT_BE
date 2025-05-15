@@ -31,11 +31,12 @@ public class GithubServiceImpl implements GithubService {
     private final CommitRepository commitRepository;
     private final CommitParentRepository commitParentRepository;
     private final FileRepository fileRepository;
+    private final BranchRepository branchRepository;
 
     @Override
     @Transactional
-    public List<CommitResponseDTO> getCommits(String ownerName, String repoName) {
-        String url = String.format("https://api.github.com/repos/%s/%s/commits?per_page=100", ownerName, repoName);
+    public List<CommitResponseDTO> getCommits(String ownerName, String repoName, String branchName) {
+        String url = String.format("https://api.github.com/repos/%s/%s/commits?per_page=100&sha=%s", ownerName, repoName, branchName);
 
         Long userId = SecurityUtil.getCurrentUserId();
 
@@ -47,14 +48,18 @@ public class GithubServiceImpl implements GithubService {
             throw new GeneralException(ErrorStatus.GITHUB_NOT_ACCESS);
         }
 
-        Owner owner = ownerRepository.findByUserIdAndOwnerName(userId,ownerName)
+        Owner owner = ownerRepository.findByUserIdAndOwnerName(userId, ownerName)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.OWNER_NOT_FOUND));
 
         Repo repo = repoRepository.findByOwnerIdAndRepoName(owner.getId(), repoName)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.REPO_NOT_FOUND));
 
+        Branch branch = branchRepository.findByRepoIdAndName(repo.getId(), branchName)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.BRANCH_NOT_FOUND));
 
-        LocalDateTime latestDate = commitRepository.findLatestCommitDateByUserId(repo.getId())
+        System.out.println("branch.getId() = " + branch.getId());
+
+        LocalDateTime latestDate = commitRepository.findLatestCommitDateByUserId(branch.getId())
                 .orElse(LocalDateTime.MIN);
 
         HttpHeaders headers = new HttpHeaders();
@@ -86,7 +91,8 @@ public class GithubServiceImpl implements GithubService {
                 })
                 .toList();
 
-        List<Commit> savedCommits = newCommits.stream().map(item -> {
+        List<Commit> savedCommits = newCommits.stream()
+                .map(item -> {
             String sha = (String) item.get("sha");
             Map<String, Object> commit = (Map<String, Object>) item.get("commit");
             String message = (String) commit.get("message");
@@ -96,11 +102,11 @@ public class GithubServiceImpl implements GithubService {
 
             return new Commit(
                     sha,
-                    repo,
                     message,
                     null,  // stats 필드는 이후에 계산할 수 있음
                     date,
-                    null
+                    null,
+                    branch
             );
         }).collect(Collectors.toList());
 
@@ -133,10 +139,10 @@ public class GithubServiceImpl implements GithubService {
 
         commitParentRepository.saveAll(savedParents);
 
-        List<Commit> allCommitList = commitRepository.findAllByRepoId(repo.getId());
+        List<Commit> allCommitList = commitRepository.findAllByBranchId(branch.getId());
 
         return allCommitList.stream()
-                .map(c -> new CommitResponseDTO(c.getId(), c.getRepo().getId() ,c.getMessage(), c.getStats(), c.getDate()))
+                .map(c -> new CommitResponseDTO(c.getId(), c.getBranch().getId() ,c.getMessage(), c.getStats(), c.getDate()))
                 .collect(Collectors.toList());
     }
 
@@ -395,5 +401,71 @@ public class GithubServiceImpl implements GithubService {
                             .build();
                     return ownerRepository.save(newOwner);
                 });
+    }
+
+    @Override
+    public List<BranchResponseDTO> getUserBranches(String ownerName, String repoName) {
+        Long userId = SecurityUtil.getCurrentUserId();
+
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+
+        Owner owner = ownerRepository.findByUserIdAndOwnerName(userId, ownerName)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.OWNER_NOT_FOUND));
+
+        Repo repo = repoRepository.findByOwnerIdAndRepoName(owner.getId(), repoName)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.REPO_NOT_FOUND));
+
+        String githubAccesstoken = user.getGithubAccesstoken();
+
+        String url = "https://api.github.com/repos/" + ownerName + "/" + repoName + "/branches";
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Accept", "application/vnd.github+json");
+        headers.set("Authorization", "Bearer " + githubAccesstoken);
+        headers.set("X-GitHub-Api-Version", "2022-11-28");
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        ParameterizedTypeReference<List<Map<String, Object>>> responseType =
+                new ParameterizedTypeReference<>() {};
+
+        ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                entity,
+                responseType
+        );
+
+
+        List<BranchResponseDTO> result = new ArrayList<>();
+        List<Branch> branches = new ArrayList<>();
+
+        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+            for (Map<String, Object> branch : response.getBody()) {
+                String name = (String) branch.get("name");
+
+                // 중복 저장 방지 (이미 DB에 있는 브랜치 필터링)
+                boolean exists = branchRepository.findByRepoIdAndName(repo.getId(), name).isPresent();
+                if (!exists) {
+                    Branch branchEntity = new Branch(
+                            null,              // id (auto-generated)
+                            name,
+                            repo,
+                            new ArrayList<>()  // commits 비워두기
+                    );
+                    branches.add(branchEntity);
+
+                }
+                branchRepository.saveAll(branches);
+                result.add(new BranchResponseDTO(name));
+
+            }
+        }
+
+        return result;
+
     }
 }

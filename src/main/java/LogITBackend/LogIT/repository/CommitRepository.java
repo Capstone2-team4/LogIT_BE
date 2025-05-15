@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CommitRepository extends JpaRepository<Commit, String> {
-    @Query("SELECT MAX(c.date) FROM Commit c WHERE c.repo.id = :repoId")
-    Optional<LocalDateTime> findLatestCommitDateByUserId(Long repoId);
+    @Query("SELECT MAX(c.date) FROM Commit c WHERE c.branch.id = :branchId")
+    Optional<LocalDateTime> findLatestCommitDateByUserId(Long branchId);
 
-    @Query("SELECT c FROM Commit c WHERE c.repo.id = :repoId")
-    List<Commit> findAllByRepoId(Long repoId);
+    @Query("SELECT c FROM Commit c WHERE c.branch.id = :branchId")
+    List<Commit> findAllByBranchId(Long branchId);
 }

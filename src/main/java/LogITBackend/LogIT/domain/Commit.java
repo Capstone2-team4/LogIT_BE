@@ -2,7 +2,6 @@ package LogITBackend.LogIT.domain;
 
 import LogITBackend.LogIT.domain.common.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.annotation.Nonnull;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,18 +19,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Commit extends BaseEntity {
-
     @Id
     @Column(length = 40)
     private String id; // commit SHA
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "repo_id", nullable = false)
-    private Repo repo;
-
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "user_id", nullable = false)
-//    private Users user;
 
     @Column(length = 255)
     private String message;
@@ -45,4 +35,7 @@ public class Commit extends BaseEntity {
     @JsonManagedReference
     private List<File> files = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "branch_id", nullable = false)
+    private Branch branch;
 }
