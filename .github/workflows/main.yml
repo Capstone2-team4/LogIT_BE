@@ -34,8 +34,7 @@ jobs:
 
       - name: 🐧application.yml 파일을 생성 합니다.
         run: |
-          cd ../../src/main/resources
-          touch ./application.yml
+          touch ./src/main/resources/application.yml  # application.yml 파일 생성
           echo "${{ secrets.PROPERTIES }}" > ./application.yml
         shell: bash
 
