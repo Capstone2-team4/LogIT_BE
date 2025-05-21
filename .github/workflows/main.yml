@@ -34,8 +34,9 @@ jobs:
 
       - name: 🐧application.yml 파일을 생성 합니다.
         run: |
+          mkdir -p ./src/main/resources  # 디렉토리가 없으면 생성
           touch ./src/main/resources/application.yml  # application.yml 파일 생성
-          echo "${{ secrets.PROPERTIES }}" > ./application.yml
+          echo "${{ secrets.PROPERTIES }}" > ./src/main/resources/application.yml
         shell: bash
 
       - name: 🐧gradle build를 위한 권한을 부여합니다.
