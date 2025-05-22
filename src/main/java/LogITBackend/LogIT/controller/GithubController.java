@@ -16,12 +16,13 @@ public class GithubController {
 
     private final GithubService githubService;
 
-    @GetMapping("/{owners}/{repos}/commits")
+    @GetMapping("/{owners}/{repos}/{branches}/commits")
     public ResponseEntity<ApiResponse<?>> getCommits(
             @PathVariable("owners") String owners,
-            @PathVariable("repos") String repos
+            @PathVariable("repos") String repos,
+            @PathVariable("branches") String branches
     ) {
-        List<CommitResponseDTO> commits = githubService.getCommits(owners, repos);
+        List<CommitResponseDTO> commits = githubService.getCommits(owners, repos, branches);
         return ResponseEntity.ok(ApiResponse.onSuccess(commits));
     }
 
@@ -33,12 +34,6 @@ public class GithubController {
     ) {
         CommitDetailResponseDTO commitDetail = githubService.getCommitDetails(owners, repos, commitId);
         return ResponseEntity.ok(ApiResponse.onSuccess(commitDetail));
-    }
-
-    @GetMapping("/users/repos")
-    public ResponseEntity<ApiResponse<?>> getUsersRepos() {
-        GithubRepoResponse repos = githubService.getUsersRepos();
-        return ResponseEntity.ok(ApiResponse.onSuccess(repos));
     }
 
     @GetMapping("/users/org")
@@ -53,5 +48,21 @@ public class GithubController {
     ) {
         GithubRepoResponse repos = githubService.getUserOrgsRepos(owners);
         return ResponseEntity.ok(ApiResponse.onSuccess(repos));
+    }
+
+    @GetMapping("/users/repos")
+    public ResponseEntity<ApiResponse<?>> getUsersRepos() {
+        GithubRepoResponse repos = githubService.getUsersRepos();
+        return ResponseEntity.ok(ApiResponse.onSuccess(repos));
+    }
+
+    @GetMapping("/{owners}/{repos}/branches")
+    public ResponseEntity<ApiResponse<?>> getUserBranches(
+            @PathVariable("owners") String owners,
+            @PathVariable("repos") String repos
+    ) {
+        List<BranchResponseDTO> branches = githubService.getUserBranches(owners, repos);
+        return ResponseEntity.ok(ApiResponse.onSuccess(branches));
+
     }
 }

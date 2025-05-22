@@ -21,7 +21,7 @@ public class CommitResponseDTO {
     public static CommitResponseDTO fromEntity(Commit commit) {
         return new CommitResponseDTO(
                 commit.getId(),
-                commit.getRepo().getId(),
+                commit.getBranch().getId(),
                 commit.getMessage(),
                 commit.getStats(),
                 commit.getDate()

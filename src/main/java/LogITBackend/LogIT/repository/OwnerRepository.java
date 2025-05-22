@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface OwnerRepository extends JpaRepository<Owner, Long> {
 
     @Query("SELECT o FROM Owner o WHERE o.user.id = :userId AND o.ownerName = :ownerName")
-    Optional<Owner> findByUserIdAndOwnerName(@Param("userId") Long userId, @Param("ownerName") String ownerName);
+    Optional<Owner>  findByUserIdAndOwnerName(@Param("userId") Long userId, @Param("ownerName") String ownerName);
 
 
     List<Owner> findAllByUserId(Long userId);
