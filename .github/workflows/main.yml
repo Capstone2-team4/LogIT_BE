@@ -64,6 +64,6 @@ jobs:
           script: |
             cd logit-server
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}
-            sudo docker rm -f $(docker ps -qa) 
-            sudo docker compose up -d
+            sudo docker rm -f $(sudo docker ps -aq) || true 
+            sudo docker-compose up -d
             sudo docker image prune -f
