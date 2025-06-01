@@ -20,7 +20,7 @@ public class Branch extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "branch_name", nullable = false, length = 50)
+    @Column(name = "branch_name", nullable = false, length = 255)
     private String name;
 
     @ManyToOne
