@@ -41,26 +41,13 @@ public class Codes extends BaseEntity {
     private String fileLocation;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private Users users;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "code_category_id")
     private CodeCategories codeCategories;
 
-    public void setUsers(Users users) {
-        // 기존에 이미 등록되어 있던 관계를 제거
-        if (this.users != null) {
-            this.users.getCodesList().remove(this);
-        }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "file_id")
+    private File file;
 
-        this.users = users;
-
-        // 양방향 관계를 설정
-        if (users != null) {
-            users.getCodesList().add(this);
-        }
-    }
 
     public void setDiaryCategories(CodeCategories codeCategories) {
         // 기존에 이미 등록되어 있던 관계를 제거
