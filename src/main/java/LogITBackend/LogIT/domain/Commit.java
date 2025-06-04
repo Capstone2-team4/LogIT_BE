@@ -23,7 +23,8 @@ public class Commit extends BaseEntity {
     @Column(length = 40)
     private String id; // commit SHA
 
-    @Column(length = 255)
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String message;
 
     @Column(length = 100)
