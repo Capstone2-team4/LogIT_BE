@@ -15,6 +15,7 @@ public class CodeResponseDTO {
     private String content;
     private String code;
     private String category;
+    private String status;
 
 //    public static CodeResponseDTO toDTO(Codes codes) {
 //        return CodeResponseDTO.builder()

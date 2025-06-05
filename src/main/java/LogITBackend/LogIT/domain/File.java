@@ -37,6 +37,5 @@ public class File extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String patch;
 
-    @OneToMany(mappedBy = "file")
-    private List<Codes> codesList;
+
 }

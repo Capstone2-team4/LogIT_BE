@@ -84,5 +84,21 @@ public class RedisCommon {
         return true;
     }
 
+    public boolean updateSnippetStatus(String userId, String snippetId) {
+        String redisKey = "user:" + userId + ":snippets";
+        Object json = redisTemplate.opsForHash().get(redisKey, snippetId);
+        if (json == null) return false;
+
+        CodeRequestDTO existing = gson.fromJson((String) json, CodeRequestDTO.class);
+
+        // 필드 업데이트
+        existing.setStatus("deleted");
+
+        // 다시 저장
+        String updatedJson = gson.toJson(existing);
+        redisTemplate.opsForHash().put(redisKey, snippetId, updatedJson);
+        return true;
+    }
+
 
 }

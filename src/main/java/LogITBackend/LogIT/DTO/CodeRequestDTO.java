@@ -17,6 +17,7 @@ public class CodeRequestDTO {
     private String content;
     private String code;
     private String category;
+    private String status;
 
 //    public Codes toEntity(Users user, CodeCategories category) {
 //        return Codes.builder()

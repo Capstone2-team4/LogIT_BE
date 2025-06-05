@@ -4,10 +4,10 @@ import LogITBackend.LogIT.DTO.*;
 import LogITBackend.LogIT.apiPayload.ApiResponse;
 import LogITBackend.LogIT.service.CodeService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/codes")
@@ -41,8 +41,17 @@ public class CodeController {
     }
 
     @PostMapping("/blocks/commit")
-    public ApiResponse<?> commitCodeBlock(@RequestBody String commitId) {
-        CommitActionResponse response = codeService.commitCodeBlock(commitId);
+    public ApiResponse<?> commitCodeBlock(@RequestBody CommitCodeBlocksRequest request) {
+        String commitId = request.getCommitId();
+        Map<String, CodeRequestDTO> bookmarksMap = request.getBookmarksMap();
+
+        CommitCodeBlocksResponse response = codeService.commitCodeBlock(commitId, bookmarksMap);
+        return ApiResponse.onSuccess(response);
+    }
+
+    @PutMapping("/block/{snippetId}/status")
+    public ApiResponse<?> updateCodeBlockStatus(@PathVariable String snippetId) {
+        SnippetUpdateResponse response = codeService.setCodeBlockStatus(snippetId);
         return ApiResponse.onSuccess(response);
     }
 

@@ -1,10 +1,9 @@
 package LogITBackend.LogIT.service;
 
 import LogITBackend.LogIT.DTO.*;
-import LogITBackend.LogIT.domain.Codes;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
+import java.util.Map;
 
 public interface CodeService {
     CodeResponseDTO addCodeBlock(CodeRequestDTO request);
@@ -13,6 +12,8 @@ public interface CodeService {
 
     SnippetUpdateResponse setCodeBlock(String snippetId, SnippetUpdateRequest request);
 
-    CommitActionResponse commitCodeBlock(String commitId);
+    CommitCodeBlocksResponse commitCodeBlock(String commitId, Map<String, CodeRequestDTO> bookmarksMap);
+
+    SnippetUpdateResponse setCodeBlockStatus(String snippetId);
 //    CodeResponseDTO addCode(@RequestBody CodeRequestDTO request);
 }
