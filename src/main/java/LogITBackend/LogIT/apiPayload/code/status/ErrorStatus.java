@@ -43,7 +43,10 @@ public enum ErrorStatus implements BaseErrorCode {
     RECORD_NOT_FOUND(HttpStatus.BAD_REQUEST, "RECORD_6001", "기록이 존재하지 않습니다."),
 
     // branch 관련 응답 7000
-    BRANCH_NOT_FOUND(HttpStatus.BAD_REQUEST, "BRANCH_7001", "브랜치가 존재하지 않습니다.");
+    BRANCH_NOT_FOUND(HttpStatus.BAD_REQUEST, "BRANCH_7001", "브랜치가 존재하지 않습니다."),
+
+    // code snippet 관련 응답 8000
+    SNIPPET_NOT_FOUND(HttpStatus.BAD_REQUEST, "SNIPPET_8001", "Code Snippet이 존재하지 않습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

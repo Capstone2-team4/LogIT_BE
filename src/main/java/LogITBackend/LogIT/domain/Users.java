@@ -71,9 +71,6 @@ public class Users extends BaseEntity {
 //    private LocalDateTime lastLogin;
 
     @OneToMany(mappedBy = "users", cascade = CascadeType.ALL)
-    private List<Codes> codesList = new ArrayList<>();
-
-    @OneToMany(mappedBy = "users", cascade = CascadeType.ALL)
     private List<CodeCategories> codeCategoriesList = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
