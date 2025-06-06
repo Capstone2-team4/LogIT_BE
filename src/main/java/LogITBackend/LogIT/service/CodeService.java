@@ -15,5 +15,6 @@ public interface CodeService {
     CommitCodeBlocksResponse commitCodeBlock(String commitId, Map<String, CodeRequestDTO> bookmarksMap);
 
     SnippetUpdateResponse setCodeBlockStatus(String snippetId);
-//    CodeResponseDTO addCode(@RequestBody CodeRequestDTO request);
+
+    CodeBlockListResponse getCodeBlockList(String commitId);
 }

@@ -195,6 +195,33 @@ public class CodeServiceImpl implements CodeService {
 
     }
 
+    @Override
+    public CodeBlockListResponse getCodeBlockList(String commitId) {
+        List<Codes> codesList = codesRepository.getAllByCommitId(commitId);
+
+        List<CodeResponseDTO> result = codesList.stream()
+                .map(code -> CodeResponseDTO.builder()
+                        .id(code.getId())
+                        .title(code.getTitle())
+                        .filePath(code.getFileName()) // fileName을 filePath로 매핑
+                        .startOffset(code.getStartOffset())
+                        .endOffset(code.getEndOffset())
+                        .content(code.getContent())
+                        .code(code.getCode())
+                        .category(code.getCodeCategories() != null ? code.getCodeCategories().getName() : null) // null 체크
+                        .status(code.getStatus())
+                        .date(code.getCreatedAt())
+                        .build())
+                .toList();
+
+
+
+        return CodeBlockListResponse.builder()
+                .commitId(commitId)
+                .CodeBlocks(result)
+                .build();
+    }
+
     //    @Override
 //    @Transactional
 //    public CodeResponseDTO addCode(CodeRequestDTO request) {

@@ -4,6 +4,8 @@ import LogITBackend.LogIT.domain.Codes;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Builder
 @Getter
 public class CodeResponseDTO {
@@ -16,14 +18,7 @@ public class CodeResponseDTO {
     private String code;
     private String category;
     private String status;
+    private LocalDateTime date;
 
-//    public static CodeResponseDTO toDTO(Codes codes) {
-//        return CodeResponseDTO.builder()
-//                .title(codes.getTitle())
-//                .content(codes.getContent())
-//                .filePath(codes.getFileLocation())
-//                .category(codes.getCodeCategories().getName())
-//                .code(codes.getCode())
-//                .build();
-//    }
+
 }
