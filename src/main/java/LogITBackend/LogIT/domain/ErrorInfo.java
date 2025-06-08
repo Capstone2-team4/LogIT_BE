@@ -22,9 +22,9 @@ public class ErrorInfo extends BaseEntity {
     @Column(nullable = false, length = 40)
     private String commitId;
 
-    @Column(nullable = false, length = 45)
+    @Column(columnDefinition = "TEXT")
     private String title;
 
-    @Column(nullable = false, length = 100)
+    @Column(columnDefinition = "TEXT")
     private String content;
 }

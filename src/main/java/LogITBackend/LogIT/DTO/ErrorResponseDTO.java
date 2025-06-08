@@ -22,6 +22,7 @@ public class ErrorResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class GetErrorInfoResultDTO {
+        Long errorInfoId;
         String title;
         String content;
     }

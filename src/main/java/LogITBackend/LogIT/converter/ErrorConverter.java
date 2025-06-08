@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 public class ErrorConverter {
     public static ErrorResponseDTO.GetErrorInfoResultDTO toGetErrorInfoResultDTO(ErrorInfo errorInfo) {
         return ErrorResponseDTO.GetErrorInfoResultDTO.builder()
+                .errorInfoId(errorInfo.getId())
                 .title(errorInfo.getTitle())
                 .content(errorInfo.getContent())
                 .build();
