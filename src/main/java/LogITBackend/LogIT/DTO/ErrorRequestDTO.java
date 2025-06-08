@@ -8,6 +8,15 @@ import java.util.List;
 
 public class ErrorRequestDTO {
 
+    // 전체 요청을 감싸는 루트 DTO
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ErrorListWrapperDTO {
+        private List<SaveErrorInfoRequestDTO> errorList;
+    }
+
     @Getter
     @Builder
     @AllArgsConstructor

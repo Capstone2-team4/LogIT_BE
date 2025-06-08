@@ -22,7 +22,7 @@ public class ErrorController {
     )
     @PostMapping("/save/errorInfo")
     public ApiResponse<?> saveErrorInfo(
-            @RequestBody ErrorRequestDTO.SaveErrorInfoRequestDTO request
+            @RequestBody ErrorRequestDTO.ErrorListWrapperDTO request
     ) {
         errorCommandService.saveErrorInfo(request);
         return ApiResponse.onSuccess(null);

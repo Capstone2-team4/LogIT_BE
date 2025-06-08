@@ -21,34 +21,38 @@ public class ErrorCommandServiceImpl implements ErrorCommandService {
     private final ErrorCodeRepository errorCodeRepository;
     private final ErrorSolvedCodeRepository errorSolvedCodeRepository;
 
-    public void saveErrorInfo(ErrorRequestDTO.SaveErrorInfoRequestDTO request) {
-        // 1. ErrorInfos 저장
-        ErrorInfo errorInfo = ErrorInfo.builder()
-                .commitId(request.getCommitId())
-                .title(request.getTitle())
-                .content(request.getContent())
-                .build();
-        ErrorInfo getErrorInfo = errorInfoRepository.save(errorInfo);
+    public void saveErrorInfo(ErrorRequestDTO.ErrorListWrapperDTO request) {
+        // errorList 내부의 여러 SaveErrorInfoRequestDTO들을 순회
+        for (ErrorRequestDTO.SaveErrorInfoRequestDTO errorItem : request.getErrorList()) {
 
-        // 2. ErrorCodes 저장
-        List<ErrorCode> errorCodes = request.getErrorCode().stream()
-                .map(dto -> ErrorCode.builder()
-                        .errorInfo(getErrorInfo)
-                        .filePath(dto.getFilePath())
-                        .errorLocation(dto.getErrorLocation())
-                        .code(dto.getCode())
-                        .build())
-                .toList();
-        errorCodeRepository.saveAll(errorCodes);
+            // 1. ErrorInfo 저장
+            ErrorInfo errorInfo = ErrorInfo.builder()
+                    .commitId(errorItem.getCommitId())
+                    .title(errorItem.getTitle())
+                    .content(errorItem.getContent())
+                    .build();
+            ErrorInfo savedErrorInfo = errorInfoRepository.save(errorInfo);
 
-        // 3. ErrorSolvedCodes 저장
-        List<ErrorSolvedCode> solvedCodes = request.getErrorSolvedCode().stream()
-                .map(dto -> ErrorSolvedCode.builder()
-                        .errorInfo(getErrorInfo)
-                        .filePath(dto.getFilePath())
-                        .code(dto.getCode())
-                        .build())
-                .toList();
-        errorSolvedCodeRepository.saveAll(solvedCodes);
+            // 2. ErrorCode 리스트 저장
+            List<ErrorCode> errorCodes = errorItem.getErrorCode().stream()
+                    .map(dto -> ErrorCode.builder()
+                            .errorInfo(savedErrorInfo)
+                            .filePath(dto.getFilePath())
+                            .errorLocation(dto.getErrorLocation())
+                            .code(dto.getCode())
+                            .build())
+                    .toList();
+            errorCodeRepository.saveAll(errorCodes);
+
+            // 3. ErrorSolvedCode 리스트 저장
+            List<ErrorSolvedCode> solvedCodes = errorItem.getErrorSolvedCode().stream()
+                    .map(dto -> ErrorSolvedCode.builder()
+                            .errorInfo(savedErrorInfo)
+                            .filePath(dto.getFilePath())
+                            .code(dto.getCode())
+                            .build())
+                    .toList();
+            errorSolvedCodeRepository.saveAll(solvedCodes);
+        }
     }
 }
