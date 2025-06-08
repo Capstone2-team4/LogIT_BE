@@ -214,8 +214,6 @@ public class CodeServiceImpl implements CodeService {
                         .build())
                 .toList();
 
-
-
         return CodeBlockListResponse.builder()
                 .commitId(commitId)
                 .CodeBlocks(result)
