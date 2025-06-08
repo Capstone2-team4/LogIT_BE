@@ -88,11 +88,11 @@ public class GithubController {
     @Operation(summary = "깃허브 - Commit 당시의 전체 코드 조회", description =
             "# 깃허브 관련 API입니다."
     )
-    @GetMapping("/{owners}/{repos}/{filePath}")
+    @GetMapping("/{owners}/{repos}/file")
     public ApiResponse<?> getCommitsFile(
             @PathVariable("owners") String owners,
             @PathVariable("repos") String repos,
-            @PathVariable("filePath") String fileName,
+            @RequestParam("filePath") String fileName,
             @RequestParam("commitId") String commitId
     ) {
         FileResponseDTO.CommitFileResponseDTO response = githubService.getCommitsFile(owners, repos, fileName, commitId);
