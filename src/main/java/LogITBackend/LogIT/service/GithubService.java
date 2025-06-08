@@ -16,4 +16,6 @@ public interface GithubService {
     GithubRepoResponse getUserOrgsRepos(String owners);
 
     List<BranchResponseDTO> getUserBranches(String owner, String repo);
+
+    FileResponseDTO.CommitFileResponseDTO getCommitsFile(String owners, String repos, String fileName, String commitId);
 }

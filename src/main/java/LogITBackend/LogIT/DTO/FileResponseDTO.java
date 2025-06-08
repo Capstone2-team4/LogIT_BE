@@ -2,10 +2,10 @@ package LogITBackend.LogIT.DTO;
 
 import LogITBackend.LogIT.domain.File;
 import jakarta.persistence.Column;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.Lob;
+import lombok.*;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.web.servlet.tags.form.TextareaTag;
 
 import java.time.LocalDateTime;
 
@@ -36,5 +36,14 @@ public class FileResponseDTO {
                 file.getCreatedAt(),
                 file.getUpdatedAt()
         );
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    public static class CommitFileResponseDTO {
+        private String commitId;
+        private String filePath;
+        private String content;
     }
 }

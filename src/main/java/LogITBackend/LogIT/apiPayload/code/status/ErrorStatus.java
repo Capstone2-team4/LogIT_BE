@@ -46,7 +46,10 @@ public enum ErrorStatus implements BaseErrorCode {
     BRANCH_NOT_FOUND(HttpStatus.BAD_REQUEST, "BRANCH_7001", "브랜치가 존재하지 않습니다."),
 
     // code snippet 관련 응답 8000
-    SNIPPET_NOT_FOUND(HttpStatus.BAD_REQUEST, "SNIPPET_8001", "Code Snippet이 존재하지 않습니다.");
+    SNIPPET_NOT_FOUND(HttpStatus.BAD_REQUEST, "SNIPPET_8001", "Code Snippet이 존재하지 않습니다."),
+    //git hub 관련 응답 9000
+    INTERNAL_SERVER_ERROR(HttpStatus.BAD_REQUEST, "GITHUB_9001", "GITHUB 요청 실패"),
+    GITHUB_API_ERROR(HttpStatus.BAD_REQUEST, "GITHUB_9002", "GITHUB API 요청 실패");
 
     private final HttpStatus httpStatus;
     private final String code;

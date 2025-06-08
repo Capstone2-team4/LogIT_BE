@@ -210,7 +210,6 @@ public class CodeServiceImpl implements CodeService {
                         .code(code.getCode())
                         .category(code.getCodeCategories() != null ? code.getCodeCategories().getName() : null) // null 체크
                         .status(code.getStatus())
-                        .date(code.getCreatedAt())
                         .build())
                 .toList();
 
