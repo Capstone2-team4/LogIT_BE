@@ -31,9 +31,9 @@ public class ErrorController {
     @Operation(summary = "에러 리스트 조회 API", description =
             "# 에러 리스트 조회 API 입니다. commit hash값을 body에 입력해주세요."
     )
-    @GetMapping("/errorInfoList")
+    @GetMapping("/errorInfoList/{commitId}")
     public ApiResponse<ErrorResponseDTO.GetErrorInfoListResultDTO> getErrorInfoList(
-            @RequestParam String commitId
+            @PathVariable String commitId
     ) {
         return ApiResponse.onSuccess(
                 errorQueryService.getErrorInfoList(commitId)
@@ -43,9 +43,9 @@ public class ErrorController {
     @Operation(summary = "에러 코드 리스트 조회 API", description =
             "# 에러 코드 리스트 조회 API 입니다. errorInfoId값을 body에 입력해주세요."
     )
-    @GetMapping("/errorCodeList")
+    @GetMapping("/errorCodeList/{errorInfoId}")
     public ApiResponse<ErrorResponseDTO.GetErrorCodeListDTO> getErrorCodeList(
-            @RequestParam Long errorInfoId
+            @PathVariable Long errorInfoId
     ) {
         return ApiResponse.onSuccess(
                 errorQueryService.getErrorCodeList(errorInfoId)
@@ -55,9 +55,9 @@ public class ErrorController {
     @Operation(summary = "에러 해결 코드 리스트 조회 API", description =
             "# 에러 해결 코드 리스트 조회 API 입니다. errorInfoId값을 body에 입력해주세요."
     )
-    @GetMapping("/errorSolvedCodeList")
+    @GetMapping("/errorSolvedCodeList/{errorInfoId}")
     public ApiResponse<ErrorResponseDTO.GetErrorSolvedCodeListDTO> getErrorSolvedCodeList(
-            @RequestParam Long errorInfoId
+            @PathVariable Long errorInfoId
     ) {
         return ApiResponse.onSuccess(
                 errorQueryService.getErrorSolvedCodeList(errorInfoId)
