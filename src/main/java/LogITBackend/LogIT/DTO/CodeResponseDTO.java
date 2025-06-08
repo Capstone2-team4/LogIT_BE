@@ -18,7 +18,5 @@ public class CodeResponseDTO {
     private String code;
     private String category;
     private String status;
-    private LocalDateTime date;
-
 
 }

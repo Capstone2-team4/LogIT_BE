@@ -7,6 +7,8 @@ import LogITBackend.LogIT.config.security.SecurityUtil;
 import LogITBackend.LogIT.domain.*;
 import LogITBackend.LogIT.repository.*;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
@@ -14,6 +16,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -467,6 +476,54 @@ public class GithubServiceImpl implements GithubService {
         }
 
         return result;
+
+    }
+
+    @Override
+    public FileResponseDTO.CommitFileResponseDTO getCommitsFile(String owners, String repos, String fileName, String commitId) {
+        Long userId = SecurityUtil.getCurrentUserId();
+
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+
+        try {
+            String apiUrl = String.format("https://api.github.com/repos/%s/%s/contents/src/%s?ref=%s",
+                    owners, repos, URLEncoder.encode(fileName, StandardCharsets.UTF_8), commitId);
+
+            URL url = new URL(apiUrl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Accept", "application/vnd.github+json");
+            conn.setRequestProperty("User-Agent", "LogIT-App");
+
+            int responseCode = conn.getResponseCode();
+            if (responseCode != 200) {
+                throw new GeneralException(ErrorStatus.GITHUB_API_ERROR);
+            }
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
+            StringBuilder response = new StringBuilder();
+            String inputLine;
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+
+            JsonObject jsonObject = JsonParser.parseString(response.toString()).getAsJsonObject();
+            String encodedContent = jsonObject.get("content").getAsString().replaceAll("\\s+", ""); // 줄바꿈 제거
+            String decodedContent = new String(Base64.getDecoder().decode(encodedContent), StandardCharsets.UTF_8);
+            String path = jsonObject.get("path").getAsString();
+
+            return FileResponseDTO.CommitFileResponseDTO.builder()
+                    .commitId(commitId)
+                    .filePath(path)
+                    .content(decodedContent)
+                    .build();
+
+        } catch (IOException e) {
+            throw new GeneralException(ErrorStatus.INTERNAL_SERVER_ERROR);
+        }
 
     }
 }
