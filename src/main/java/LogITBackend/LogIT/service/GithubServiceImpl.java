@@ -487,8 +487,10 @@ public class GithubServiceImpl implements GithubService {
                 .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
 
         try {
-            String apiUrl = String.format("https://api.github.com/repos/%s/%s/contents/src/%s?ref=%s",
-                    owners, repos, URLEncoder.encode(fileName, StandardCharsets.UTF_8), commitId);
+            String apiUrl = String.format(
+                    "https://api.github.com/repos/%s/%s/contents/%s?ref=%s",
+                    owners, repos, fileName, commitId
+            );
 
             URL url = new URL(apiUrl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
