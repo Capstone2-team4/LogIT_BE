@@ -19,7 +19,7 @@ public class ErrorCode extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 100)
+    @Column(columnDefinition = "TEXT")
     private String filePath;
 
     private int errorLocation;
