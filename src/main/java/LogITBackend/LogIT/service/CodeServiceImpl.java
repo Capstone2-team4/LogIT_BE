@@ -122,6 +122,8 @@ public class CodeServiceImpl implements CodeService {
                         .build();
 
                 codesRepository.save(codeEntity);
+                redisCommon.deleteSnippet(String.valueOf(userId), dto.getId());
+
 
             } else if ("deleted".equalsIgnoreCase(status)) {
                 // ──────────── deleted 상태 ────────────
@@ -163,10 +165,10 @@ public class CodeServiceImpl implements CodeService {
                         .build();
 
                 codesRepository.save(codeEntity);
+                redisCommon.deleteSnippet(String.valueOf(userId), requestDto.getId());
             }
         }
 
-        redisCommon.deleteSnippet(String.valueOf(userId), commitId);
 
         // 5) 성공 응답 반환
         return CommitCodeBlocksResponse.builder()
