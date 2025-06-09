@@ -9,4 +9,8 @@ public interface AiSummaryCommandService {
             String repository,
             AiSummaryRequestDTO.CreateAiSummaryRequest request
     );
+
+    void createSummaryTemplate(AiSummaryRequestDTO.CreateSummaryTemplateRequest request);
+
+    AiSummaryResponseDTO.getSummaryTemplateResultDTO getSummaryTemplate();
 }
