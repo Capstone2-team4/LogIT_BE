@@ -10,9 +10,13 @@ import LogITBackend.LogIT.DTO.FileResponseDTO;
 import LogITBackend.LogIT.apiPayload.code.status.ErrorStatus;
 import LogITBackend.LogIT.apiPayload.exception.GeneralException;
 import LogITBackend.LogIT.config.security.SecurityUtil;
+import LogITBackend.LogIT.converter.AiSummaryConverter;
+import LogITBackend.LogIT.domain.SummaryTemplate;
 import LogITBackend.LogIT.domain.Users;
+import LogITBackend.LogIT.repository.SummaryTemplateRepository;
 import LogITBackend.LogIT.repository.UserRepository;
 import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,6 +46,7 @@ public class AiSummaryCommandServiceImpl implements AiSummaryCommandService {
 
     private final GithubService githubService;
     private final UserRepository userRepository;
+    private final SummaryTemplateRepository summaryTemplateRepository;
 
     // ChatGPT API 요청
     public String getResponseOfChatGptApi(String systemPrompt, String userPrompt){
@@ -58,8 +63,14 @@ public class AiSummaryCommandServiceImpl implements AiSummaryCommandService {
             String repository,
             AiSummaryRequestDTO.CreateAiSummaryRequest request
     ) {
+        Long userId = SecurityUtil.getCurrentUserId();
         StringBuilder userPrompt = new StringBuilder();
-        userPrompt.append("요약 글 template: ").append(request.getTemplate()).append("\n");
+
+        SummaryTemplate summaryTemplate = summaryTemplateRepository.findByUsers(
+                userRepository.findById(userId)
+                        .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND))
+        );
+        userPrompt.append("요약 글 template: ").append(summaryTemplate.getContent()).append("\n");
         for (String commitId : request.getCommitIdList()) {
             CommitDetailResponseDTO commitDetail = getCommitInfo(
                     owners,
@@ -142,5 +153,32 @@ public class AiSummaryCommandServiceImpl implements AiSummaryCommandService {
 
         // ✅ 최종 DTO 조합
         return new CommitDetailResponseDTO(commitResponseDTO, files);
+    }
+
+    @Override
+    @Transactional
+    public void createSummaryTemplate(AiSummaryRequestDTO.CreateSummaryTemplateRequest request) {
+        Long userId = SecurityUtil.getCurrentUserId();
+        Users getUser = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+        SummaryTemplate summaryTemplate = AiSummaryConverter.toSummaryTemplate(request);
+        summaryTemplate.setUsers(getUser);
+        summaryTemplateRepository.deleteByUsers(getUser); // 기존 템플릿 삭제
+        summaryTemplateRepository.flush(); // 🔥 강제 flush로 즉시 delete 쿼리 실행
+        summaryTemplateRepository.save(summaryTemplate);
+    }
+
+    @Override
+    public AiSummaryResponseDTO.getSummaryTemplateResultDTO getSummaryTemplate() {
+        Long userId = SecurityUtil.getCurrentUserId();
+        Users getUser = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+        SummaryTemplate summaryTemplate = summaryTemplateRepository.findByUsers(getUser);
+        if (summaryTemplate == null) {
+            return AiSummaryResponseDTO.getSummaryTemplateResultDTO.builder()
+                    .template("") // 기본 템플릿 설정
+                    .build();
+        }
+        return AiSummaryConverter.toGetSummaryTemplateResultDTO(summaryTemplate);
     }
 }

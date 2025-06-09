@@ -17,4 +17,12 @@ public class AiSummaryRequestDTO {
         private List<String> commitIdList;
         private String template;
     }
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class CreateSummaryTemplateRequest {
+        private String template;
+    }
 }

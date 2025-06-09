@@ -13,4 +13,12 @@ public class AiSummaryResponseDTO {
     public static class CreateAiSummaryResultDTO {
         private String AiSummaryRecord;
     }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class getSummaryTemplateResultDTO {
+        private String template;
+    }
 }
