@@ -212,6 +212,7 @@ public class CodeServiceImpl implements CodeService {
                         .code(code.getCode())
                         .category(code.getCodeCategories() != null ? code.getCodeCategories().getName() : null) // null 체크
                         .status(code.getStatus())
+                        .createdAt(code.getCreatedAt())
                         .build())
                 .toList();
 
@@ -221,18 +222,18 @@ public class CodeServiceImpl implements CodeService {
                 .build();
     }
 
-    //    @Override
-//    @Transactional
-//    public CodeResponseDTO addCode(CodeRequestDTO request) {
-//        Long userId = SecurityUtil.getCurrentUserId();
-//        Users user = userRepository.findById(userId)
-//                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
-//
-//        CodeCategories category = categoryRepository.findByUsersIdAndName(userId, request.getCategory())
-//                .orElseThrow(() -> new GeneralException(ErrorStatus.CATEGORY_NOT_FOUND));
-//
-//        Codes code = request.toEntity(user, category);
-//
-//        return CodeResponseDTO.toDTO(codeRepository.save(code));
-//    }
+    @Override
+    public CodeResponseDTO.CodeDeleteResponseDTO deleteCodeBlock(String snippetId) {
+        Long userId = SecurityUtil.getCurrentUserId();
+
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+
+        codesRepository.deleteById(snippetId);
+
+        return CodeResponseDTO.CodeDeleteResponseDTO.builder()
+                .id(snippetId)
+                .message("Code Block 삭제 완료.")
+                .build();
+    }
 }
