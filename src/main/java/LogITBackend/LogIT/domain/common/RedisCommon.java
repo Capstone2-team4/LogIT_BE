@@ -3,11 +3,14 @@ package LogITBackend.LogIT.domain.common;
 import LogITBackend.LogIT.DTO.CodeRequestDTO;
 import LogITBackend.LogIT.DTO.CodeResponseDTO;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +20,12 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class RedisCommon {
     private final RedisTemplate<String, String> redisTemplate;
-    private final Gson gson;
+    private static final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(LocalDateTime.class, (com.google.gson.JsonDeserializer<LocalDateTime>)
+                    (json, type, context) -> LocalDateTime.parse(json.getAsString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+            .registerTypeAdapter(LocalDateTime.class, (com.google.gson.JsonSerializer<LocalDateTime>)
+                    (src, type, context) -> new com.google.gson.JsonPrimitive(src.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
+            .create();
 
     /**
      * MyBookMark 객체를 Redis Hash에 JSON으로 저장
