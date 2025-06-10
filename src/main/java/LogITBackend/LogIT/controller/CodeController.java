@@ -67,7 +67,7 @@ public class CodeController {
 
 
     @Operation(summary = "커밋id로 코드블럭 조회", description =
-            "# 커밋id로 관련 코드블럭 조회입니다. 아이디와 패스워드를 body에 입력해주세요."
+            "# 커밋id로 관련 코드블럭 조회 API 입니다. 아이디와 패스워드를 body에 입력해주세요."
     )
     @GetMapping("/blocks/{commitId}")
     public ApiResponse<?> getCodeBlockList(@PathVariable String commitId) {
@@ -75,6 +75,14 @@ public class CodeController {
         return ApiResponse.onSuccess(response);
     }
 
+    @Operation(summary = "snippetId(uuid)로 해당 코드블럭 삭제", description =
+            "# snippetId(uuid)로 관련 코드블럭 삭제 API 입니다. 아이디와 패스워드를 body에 입력해주세요."
+    )
+    @DeleteMapping("/blocks/{snippetId}")
+    public ApiResponse<?> deleteCodeBlock(@PathVariable String snippetId) {
+        CodeResponseDTO.CodeDeleteResponseDTO response = codeService.deleteCodeBlock(snippetId);
+        return ApiResponse.onSuccess(response);
+    }
 
 
 }

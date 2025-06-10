@@ -17,4 +17,6 @@ public interface CodeService {
     SnippetUpdateResponse setCodeBlockStatus(String snippetId);
 
     CodeBlockListResponse getCodeBlockList(String commitId);
+
+    CodeResponseDTO.CodeDeleteResponseDTO deleteCodeBlock(String snippetId);
 }

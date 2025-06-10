@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface CodesRepository extends JpaRepository<Codes, Long> {
+public interface CodesRepository extends JpaRepository<Codes, String> {
 
     List<Codes> getAllByCommitId(String commitId);
 }

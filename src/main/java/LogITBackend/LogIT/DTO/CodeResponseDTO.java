@@ -18,5 +18,13 @@ public class CodeResponseDTO {
     private String code;
     private String category;
     private String status;
+    private LocalDateTime createdAt;
+
+    @Builder
+    @Getter
+    public static class CodeDeleteResponseDTO {
+        private String id;
+        private String message;
+    }
 
 }
