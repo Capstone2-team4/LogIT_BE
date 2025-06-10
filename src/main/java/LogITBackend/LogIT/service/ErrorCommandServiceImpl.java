@@ -2,8 +2,10 @@ package LogITBackend.LogIT.service;
 
 import LogITBackend.LogIT.DTO.ErrorRequestDTO;
 import LogITBackend.LogIT.domain.ErrorCode;
+import LogITBackend.LogIT.domain.ErrorCodeBlock;
 import LogITBackend.LogIT.domain.ErrorInfo;
 import LogITBackend.LogIT.domain.ErrorSolvedCode;
+import LogITBackend.LogIT.repository.ErrorCodeBlockRepository;
 import LogITBackend.LogIT.repository.ErrorCodeRepository;
 import LogITBackend.LogIT.repository.ErrorInfoRepository;
 import LogITBackend.LogIT.repository.ErrorSolvedCodeRepository;
@@ -20,6 +22,7 @@ public class ErrorCommandServiceImpl implements ErrorCommandService {
     private final ErrorInfoRepository errorInfoRepository;
     private final ErrorCodeRepository errorCodeRepository;
     private final ErrorSolvedCodeRepository errorSolvedCodeRepository;
+    private final ErrorCodeBlockRepository errorCodeBlockRepository;
 
     public void saveErrorInfo(ErrorRequestDTO.ErrorListWrapperDTO request) {
         // errorList 내부의 여러 SaveErrorInfoRequestDTO들을 순회
@@ -44,15 +47,33 @@ public class ErrorCommandServiceImpl implements ErrorCommandService {
                     .toList();
             errorCodeRepository.saveAll(errorCodes);
 
-            // 3. ErrorSolvedCode 리스트 저장
-            List<ErrorSolvedCode> solvedCodes = errorItem.getErrorSolvedCode().stream()
-                    .map(dto -> ErrorSolvedCode.builder()
-                            .errorInfo(savedErrorInfo)
-                            .filePath(dto.getFilePath())
-                            .code(dto.getCode())
-                            .build())
-                    .toList();
-            errorSolvedCodeRepository.saveAll(solvedCodes);
+            // 3. ErrorSolvedCode + ErrorCodeBlock 저장
+            for (ErrorRequestDTO.ErrorSolvedCodeDTO solvedDTO : errorItem.getErrorSolvedCode()) {
+                ErrorSolvedCode solvedCode = ErrorSolvedCode.builder()
+                        .errorInfo(savedErrorInfo)
+                        .filePath(solvedDTO.getFilePath())
+                        .code(solvedDTO.getCode())
+                        .build();
+                ErrorSolvedCode savedSolvedCode = errorSolvedCodeRepository.save(solvedCode);
+
+                List<ErrorCodeBlock> blocks = solvedDTO.getErrorCodeBlock().stream()
+                        .map(blockDTO -> ErrorCodeBlock.builder()
+//                                .id(blockDTO.getId())
+                                .title(blockDTO.getTitle())
+                                .fileName(blockDTO.getFilePath())
+                                .startOffset(blockDTO.getStartOffset())
+                                .endOffset(blockDTO.getEndOffset())
+                                .content(blockDTO.getContent())
+                                .code(blockDTO.getCode())
+                                .category(blockDTO.getCategory())
+                                .status(blockDTO.getStatus())
+                                .errorSolvedCode(savedSolvedCode) // 연결
+                                .build())
+                        .toList();
+
+                // ErrorCodeBlock 저장
+                errorCodeBlockRepository.saveAll(blocks); // 실제 구현체에서 이 메서드 제공해야 함
+            }
         }
     }
 }
