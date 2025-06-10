@@ -28,6 +28,7 @@ public class ErrorRequestDTO {
         private List<ErrorCodeDTO> errorCode;
         private List<ErrorSolvedCodeDTO> errorSolvedCode;
     }
+
     @Getter
     @Setter
     public static class ErrorCodeDTO {
@@ -41,5 +42,20 @@ public class ErrorRequestDTO {
     public static class ErrorSolvedCodeDTO {
         private String filePath;
         private String code;
+        private List<ErrorCodeBlockDTO> errorCodeBlock;
+    }
+
+    @Getter
+    @Setter
+    public static class ErrorCodeBlockDTO {
+        private String id;
+        private String title;
+        private String filePath;
+        private int startOffset;
+        private int endOffset;
+        private String content;
+        private String code;
+        private String category;
+        private String status;
     }
 }
