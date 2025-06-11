@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface ErrorSolvedCodeRepository extends JpaRepository<ErrorSolvedCode, Long> {
     List<ErrorSolvedCode> findAllByErrorInfo(ErrorInfo errorInfo);
+
+    List<ErrorSolvedCode> findAllByErrorInfoId(Long errorInfoId);
 }

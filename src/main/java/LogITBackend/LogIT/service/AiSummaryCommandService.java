@@ -13,4 +13,6 @@ public interface AiSummaryCommandService {
     void createSummaryTemplate(AiSummaryRequestDTO.CreateSummaryTemplateRequest request);
 
     AiSummaryResponseDTO.getSummaryTemplateResultDTO getSummaryTemplate();
+
+    AiSummaryResponseDTO.CreateAiSummaryResultDTO createErrorAiSummary(Long errorInfoId);
 }
