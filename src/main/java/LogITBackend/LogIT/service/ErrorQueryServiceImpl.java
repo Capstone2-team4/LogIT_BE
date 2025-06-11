@@ -3,6 +3,7 @@ package LogITBackend.LogIT.service;
 import LogITBackend.LogIT.DTO.ErrorResponseDTO;
 import LogITBackend.LogIT.converter.ErrorConverter;
 import LogITBackend.LogIT.domain.ErrorCode;
+import LogITBackend.LogIT.domain.ErrorCodeBlock;
 import LogITBackend.LogIT.domain.ErrorInfo;
 import LogITBackend.LogIT.domain.ErrorSolvedCode;
 import LogITBackend.LogIT.repository.ErrorCodeRepository;

@@ -1,11 +1,7 @@
 package LogITBackend.LogIT.DTO;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public class ErrorResponseDTO {
@@ -60,5 +56,21 @@ public class ErrorResponseDTO {
     public static class GetErrorSolvedCodeDTO {
         private String filePath;
         private String code;
+        private List<GetCodeBlockDTO> codeBlockList;
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    public static class GetCodeBlockDTO {
+//        private String id;
+        private String title;
+        private String filePath;
+        private int startOffset;
+        private int endOffset;
+        private String content;
+        private String code;
+        private String category;
+        private String status;
     }
 }

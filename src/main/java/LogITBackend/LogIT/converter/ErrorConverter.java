@@ -2,6 +2,7 @@ package LogITBackend.LogIT.converter;
 
 import LogITBackend.LogIT.DTO.ErrorResponseDTO;
 import LogITBackend.LogIT.domain.ErrorCode;
+import LogITBackend.LogIT.domain.ErrorCodeBlock;
 import LogITBackend.LogIT.domain.ErrorInfo;
 import LogITBackend.LogIT.domain.ErrorSolvedCode;
 
@@ -45,13 +46,6 @@ public class ErrorConverter {
                 .build();
     }
 
-    public static ErrorResponseDTO.GetErrorSolvedCodeDTO toGetErrorSolvedCodeDTO(ErrorSolvedCode errorSolvedCode) {
-        return ErrorResponseDTO.GetErrorSolvedCodeDTO.builder()
-                .filePath(errorSolvedCode.getFilePath())
-                .code(errorSolvedCode.getCode())
-                .build();
-    }
-
     public static ErrorResponseDTO.GetErrorSolvedCodeListDTO toGetErrorSolvedCodeListDTO(List<ErrorSolvedCode> errorSolvedCodeList) {
         List<ErrorResponseDTO.GetErrorSolvedCodeDTO> getErrorSolvedCodeDTOList = errorSolvedCodeList.stream()
                 .map(ErrorConverter::toGetErrorSolvedCodeDTO)
@@ -59,6 +53,33 @@ public class ErrorConverter {
 
         return ErrorResponseDTO.GetErrorSolvedCodeListDTO.builder()
                 .errorSolvedCodeList(getErrorSolvedCodeDTOList)
+                .build();
+    }
+
+    public static ErrorResponseDTO.GetErrorSolvedCodeDTO toGetErrorSolvedCodeDTO(ErrorSolvedCode errorSolvedCode) {
+        List<ErrorCodeBlock> errorCodeBlockList = errorSolvedCode.getErrorCodeBlockList();
+        List<ErrorResponseDTO.GetCodeBlockDTO> getCodeBlockDTOList = errorCodeBlockList.stream()
+                .map(ErrorConverter::toGetErrorCodeBlockDTO)
+                .collect(Collectors.toList());
+
+        return ErrorResponseDTO.GetErrorSolvedCodeDTO.builder()
+                .filePath(errorSolvedCode.getFilePath())
+                .code(errorSolvedCode.getCode())
+                .codeBlockList(getCodeBlockDTOList)
+                .build();
+    }
+
+    public static ErrorResponseDTO.GetCodeBlockDTO toGetErrorCodeBlockDTO(ErrorCodeBlock errorCodeBlock) {
+        return ErrorResponseDTO.GetCodeBlockDTO.builder()
+//                .id(errorCodeBlock.getId())
+                .title(errorCodeBlock.getTitle())
+                .filePath(errorCodeBlock.getFileName())
+                .startOffset(errorCodeBlock.getStartOffset())
+                .endOffset(errorCodeBlock.getEndOffset())
+                .content(errorCodeBlock.getContent())
+                .code(errorCodeBlock.getCode())
+                .category(errorCodeBlock.getCategory())
+                .status(errorCodeBlock.getStatus())
                 .build();
     }
 }

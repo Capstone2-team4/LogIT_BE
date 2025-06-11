@@ -48,4 +48,17 @@ public class ErrorCodeBlock extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "error_solved_code_id")
     private ErrorSolvedCode errorSolvedCode;
+
+    public void setErrorSolvedCode(ErrorSolvedCode errorSolvedCode) {
+//        // 기존에 이미 등록되어 있던 관계를 제거
+//        if (this.errorSolvedCode != null) {
+//            this.errorSolvedCode.getErrorCodeBlockList().remove(this);
+//        }
+        this.errorSolvedCode = errorSolvedCode;
+
+//        // 양방향 관계를 설정
+//        if (errorSolvedCode != null) {
+//            errorSolvedCode.getErrorCodeBlockList().add(this);
+//        }
+    }
 }

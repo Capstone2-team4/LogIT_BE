@@ -6,6 +6,9 @@ import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @DynamicUpdate
@@ -28,6 +31,10 @@ public class ErrorSolvedCode extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "error_info_id")
     private ErrorInfo errorInfo;
+
+    @OneToMany(mappedBy = "errorSolvedCode", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<ErrorCodeBlock> errorCodeBlockList = new ArrayList<>();
 
     public void setErrorInfo(ErrorInfo errorInfo) {
         this.errorInfo = errorInfo;
