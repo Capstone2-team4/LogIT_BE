@@ -11,4 +11,6 @@ import java.util.List;
 @Repository
 public interface ErrorCodeRepository extends JpaRepository<ErrorCode, Long> {
     List<ErrorCode> findAllByErrorInfo(ErrorInfo errorInfo);
+
+    List<ErrorCode> findAllByErrorInfoId(Long errorInfoId);
 }

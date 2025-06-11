@@ -50,4 +50,16 @@ public class AiSummaryController {
                 aiSummaryCommandService.getSummaryTemplate()
         );
     }
+
+    @Operation(summary = "ai로 선택한 에러의 내용(에러코드 + 에러해결코드)을 글로 요약해주는 api", description =
+            "# 입력한 errorInfoId의 에러의 내용(에러코드 + 에러해결코드)을 요약해주는 api입니다."
+    )
+    @PostMapping("/error")
+    public ApiResponse<AiSummaryResponseDTO.CreateAiSummaryResultDTO> createAiSummaryRecord(
+            @RequestParam Long errorInfoId
+    ) {
+        return ApiResponse.onSuccess(
+                aiSummaryCommandService.createErrorAiSummary(errorInfoId)
+        );
+    }
 }

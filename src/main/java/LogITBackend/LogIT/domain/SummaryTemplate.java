@@ -18,7 +18,7 @@ public class SummaryTemplate {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     @OneToOne
