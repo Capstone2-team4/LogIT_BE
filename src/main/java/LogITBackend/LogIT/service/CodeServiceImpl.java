@@ -236,4 +236,11 @@ public class CodeServiceImpl implements CodeService {
                 .message("Code Block 삭제 완료.")
                 .build();
     }
+
+    @Override
+    public CodeResponseDTO.CodeDeleteResponseDTO deleteCodeBlockFromRedis(String snippetId) {
+        Long userId = SecurityUtil.getCurrentUserId();
+
+        return redisCommon.deleteSnippet(String.valueOf(userId), snippetId);
+    }
 }

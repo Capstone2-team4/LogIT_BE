@@ -65,6 +65,16 @@ public class CodeController {
         return ApiResponse.onSuccess(response);
     }
 
+    @Operation(summary = "플러그인 - snippetId(uuid)로 해당 코드블럭 Redis에서 삭제", description =
+            "# 플러그인 관련 API입니다."
+    )
+    @DeleteMapping("/redis/blocks/{snippetId}")
+    public ApiResponse<?> deleteCodeBlockFromRedis(@PathVariable String snippetId) {
+        CodeResponseDTO.CodeDeleteResponseDTO response = codeService.deleteCodeBlockFromRedis(snippetId);
+        return ApiResponse.onSuccess(response);
+    }
+
+
 
     @Operation(summary = "커밋id로 코드블럭 조회", description =
             "# 커밋id로 관련 코드블럭 조회 API 입니다. 아이디와 패스워드를 body에 입력해주세요."
@@ -75,7 +85,7 @@ public class CodeController {
         return ApiResponse.onSuccess(response);
     }
 
-    @Operation(summary = "snippetId(uuid)로 해당 코드블럭 삭제", description =
+    @Operation(summary = "snippetId(uuid)로 해당 코드블럭 DB에서 삭제", description =
             "# snippetId(uuid)로 관련 코드블럭 삭제 API 입니다. 아이디와 패스워드를 body에 입력해주세요."
     )
     @DeleteMapping("/blocks/{snippetId}")

@@ -55,9 +55,16 @@ public class RedisCommon {
     /**
      * 해당 스니펫 삭제
      */
-    public void deleteSnippet(String userId, String snippetId) {
+    public CodeResponseDTO.CodeDeleteResponseDTO deleteSnippet(String userId, String snippetId) {
         String redisKey = "user:" + userId + ":snippets";
         redisTemplate.opsForHash().delete(redisKey, snippetId);
+
+        return CodeResponseDTO.CodeDeleteResponseDTO.builder()
+                .id(snippetId)
+                .message("snippet deleted from redis")
+                .build();
+
+
     }
 
     /**

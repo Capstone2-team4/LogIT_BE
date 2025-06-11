@@ -19,4 +19,6 @@ public interface CodeService {
     CodeBlockListResponse getCodeBlockList(String commitId);
 
     CodeResponseDTO.CodeDeleteResponseDTO deleteCodeBlock(String snippetId);
+
+    CodeResponseDTO.CodeDeleteResponseDTO deleteCodeBlockFromRedis(String snippetId);
 }
