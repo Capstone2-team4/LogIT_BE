@@ -49,6 +49,7 @@ public class AiSummaryCommandServiceImpl implements AiSummaryCommandService {
     private final ErrorInfoRepository errorInfoRepository;
     private final ErrorCodeRepository errorCodeRepository;
     private final ErrorSolvedCodeRepository errorSolvedCodeRepository;
+    private final CodesRepository codesRepository;
 
     // ChatGPT API 요청
     public String getResponseOfChatGptApi(String systemPrompt, String userPrompt){
@@ -82,8 +83,42 @@ public class AiSummaryCommandServiceImpl implements AiSummaryCommandService {
             userPrompt.append("커밋 메시지: ").append(commitDetail.getCommitResponseDTO().getMessage()).append("\n");
             userPrompt.append("커밋 파일 목록:\n");
             for (FileResponseDTO file : commitDetail.getFiles()) {
-                userPrompt.append("파일명: ").append(file.getFilename()).append("\n");
+                String filename = file.getFilename();
+                userPrompt.append("파일명: ").append(filename).append("\n");
                 userPrompt.append("해당파일의 코드: ").append(file.getPatch()).append("\n");
+                // 파일에 해당하는 코드 블럭 가져오기
+                List<Codes> getCodesList = codesRepository.findAllByCommitIdAndFileName(commitId, filename);
+                userPrompt.append("아래 포함되는 내용은 사용자가 해당 파일의 코드에 남긴 기록들입니다. commit에 대한 코드를 요약할때 아래 내용도 포함시켜주세요.");
+                for (Codes codes : getCodesList) {
+                    System.out.println("********커밋과 파일에 해당하는 코드 블럭 내용: " + codes.getContent());
+                    userPrompt.append("기록을 남긴 코드 부분: ").append(codes.getCode()).append("\n");
+                    userPrompt.append("기록명: ").append(codes.getTitle()).append("\n");
+                    userPrompt.append("기록내용: ").append(codes.getContent()).append("\n");
+                }
+            }
+            // commit에 해당하는 오류 정보 가져오기
+            userPrompt.append("아래 포함되는 내용은 commit에서 발생했던 오류들입니다. 오류마다 오류가 발생했던 코드와 오류를 해결한 코드가 포함되어 있습니다.").append("\n");
+            List<ErrorInfo> errorInfoList = errorInfoRepository.findAllByCommitId(commitId);
+            for (ErrorInfo errorInfo : errorInfoList) {
+                // 1. 에러 코드와 에러 해결 코드 조회
+                List<ErrorCode> errorCodes = errorCodeRepository.findAllByErrorInfoId(errorInfo.getId());
+                List<ErrorSolvedCode> errorSolvedCodes = errorSolvedCodeRepository.findAllByErrorInfoId(errorInfo.getId());
+
+                userPrompt.append("에러 제목: ").append(errorInfo.getTitle()).append("\n");
+                userPrompt.append("에러 내용: ").append(errorInfo.getContent()).append("\n\n");
+
+                userPrompt.append("[에러 코드 목록]\n");
+                for (ErrorCode code : errorCodes) {
+                    userPrompt.append("- 파일: ").append(code.getFilePath())
+                            .append(", 위치: ").append(code.getErrorLocation())
+                            .append(", 코드: ").append(code.getCode()).append("\n");
+                }
+
+                userPrompt.append("\n[에러 해결 코드 목록]\n");
+                for (ErrorSolvedCode solved : errorSolvedCodes) {
+                    userPrompt.append("- 파일: ").append(solved.getFilePath())
+                            .append(", 코드: ").append(solved.getCode()).append("\n");
+                }
             }
         }
         System.out.println("-------------------User Prompt: \n" + userPrompt.toString());
