@@ -10,4 +10,6 @@ import java.util.List;
 public interface CodesRepository extends JpaRepository<Codes, String> {
 
     List<Codes> getAllByCommitId(String commitId);
+
+    List<Codes> findAllByCommitIdAndFileName(String commitId, String fileName);
 }
